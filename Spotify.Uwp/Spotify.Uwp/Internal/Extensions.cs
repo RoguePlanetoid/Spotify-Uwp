@@ -16,20 +16,20 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="images"></param>
         /// <returns></returns>
-        public static ImageViewModel GetLargeImage(this List<Image> images) =>
-            Mapping.MapImage(images.OrderByDescending(o => o.Height * o.Width).FirstOrDefault());
+        public static ImageViewModel GetLargeImage(this IList<ImageViewModel> images) =>
+            images.OrderByDescending(o => o.Height * o.Width).FirstOrDefault();
 
         /// <summary>
         /// Medium Image
         /// </summary>
         /// <param name="images"></param>
         /// <returns></returns>
-        public static ImageViewModel GetMediumImage(this List<Image> images)
+        public static ImageViewModel GetMediumImage(this IList<ImageViewModel> images)
         {
             var small = GetSmallImage(images);
             var large = GetLargeImage(images);
-            var medium = Mapping.MapImage(images.FirstOrDefault
-                (f => Mapping.MapImage(f) != small || Mapping.MapImage(f) != large));
+            var medium = images.FirstOrDefault
+                (f => f != small || f != large);
             return medium ?? large;
         }
 
@@ -38,15 +38,15 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="images"></param>
         /// <returns></returns>
-        public static ImageViewModel GetSmallImage(this List<Image> images) =>
-            Mapping.MapImage(images.OrderBy(o => o.Height * o.Width).FirstOrDefault());
+        public static ImageViewModel GetSmallImage(this IList<ImageViewModel> images) =>
+            images.OrderBy(o => o.Height * o.Width).FirstOrDefault();
 
         /// <summary>
         /// Get Artist
         /// </summary>
         /// <param name="artists"></param>
         /// <returns>Artist</returns>
-        public static Artist GetArtist(this List<Artist> artists) =>
+        public static ArtistViewModel GetArtist(this IList<ArtistViewModel> artists) =>
             artists.FirstOrDefault();
 
         /// <summary>

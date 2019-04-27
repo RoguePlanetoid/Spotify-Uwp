@@ -50,21 +50,6 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static ImageViewModel MapLargeImage(List<ImageViewModel> images) =>
-            images.OrderByDescending(o => o.Height * o.Width).FirstOrDefault();
-
-        public static ImageViewModel MapSmallImage(List<ImageViewModel> images) =>
-           images.OrderBy(o => o.Height * o.Width).FirstOrDefault();
-
-        public static ImageViewModel MapMediumImage(List<ImageViewModel> images)
-        {
-            var small = MapSmallImage(images);
-            var large = MapLargeImage(images);
-            var medium = images.FirstOrDefault
-                (f => f != small || f != large);
-            return medium ?? large;
-        }
-
         public static CopyrightViewModel MapCopyright(Copyright source)
         {
             if (source == null) return null;

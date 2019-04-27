@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Spotify.Uwp.Internal;
 
 namespace Spotify.Uwp.ViewModels
 {
@@ -25,16 +26,16 @@ namespace Spotify.Uwp.ViewModels
         /// <summary>
         /// Large Image
         /// </summary>
-        public ImageViewModel Large { get; set; }
+        public ImageViewModel Large => Images.GetLargeImage();
 
         /// <summary>
         /// Medium Image
         /// </summary>
-        public ImageViewModel Medium { get; set; }
+        public ImageViewModel Medium => Images.GetMediumImage();
 
         /// <summary>
         /// Small Image
         /// </summary>
-        public ImageViewModel Small { get; set; }
+        public ImageViewModel Small => Images.GetSmallImage();
     }
 }
