@@ -10,9 +10,4 @@
     <releaseNotes>Alpha Version</releaseNotes>
     <repository url="https://github.com/RoguePlanetoid/Spotify-Uwp" />
   </metadata>
-  <files>
-    <file src="bin\$configuration$\*.dll" target="lib\uap10.0\" />
-    <file src="bin\$configuration$\*.pdb" target="lib\uap10.0\" />
-    <file src="bin\$configuration$\*.pri" target="lib\uap10.0\" />
-  </files>
 </package>
