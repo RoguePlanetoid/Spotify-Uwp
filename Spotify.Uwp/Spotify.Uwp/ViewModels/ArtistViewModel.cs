@@ -1,32 +1,26 @@
 ﻿using Spotify.NetStandard.Responses;
-using Spotify.Uwp.Internal;
-using System.Windows.Input;
+using System.Collections.Generic;
 
 namespace Spotify.Uwp.ViewModels
 {
     /// <summary>
     /// Artist View Model
     /// </summary>
-    public class ArtistViewModel : Artist
+    public class ArtistViewModel : ContentViewModel
     {
         /// <summary>
-        /// Large Image
+        /// Information about the followers of the artist.
         /// </summary>
-        public Image Large => Images.GetLargeImage();
+        public Followers Followers { get; set; }
 
         /// <summary>
-        /// Medium Image
+        /// A list of the genres the artist is associated with. For example: "Prog Rock" , "Post-Grunge".
         /// </summary>
-        public Image Medium => Images.GetMediumImage();
+        public IList<string> Genres { get; set; }
 
         /// <summary>
-        /// Small Image
+        /// The popularity of the artist. The value will be between 0 and 100, with 100 being the most popular.
         /// </summary>
-        public Image Small => Images.GetSmallImage();
-
-        /// <summary>
-        /// Command
-        /// </summary>
-        public ICommand Command { get; set; }
+        public int Popularity { get; set; }
     }
 }

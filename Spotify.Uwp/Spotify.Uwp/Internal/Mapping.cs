@@ -2,6 +2,7 @@
 using Spotify.NetStandard.Responses;
 using Spotify.Uwp.ViewModels;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Spotify.Uwp.Internal
@@ -18,7 +19,7 @@ namespace Spotify.Uwp.Internal
                 Refresh = source.Refresh,
                 Scopes = source.Scopes,
                 Token = source.Token,
-                TokenType = source.TokenType
+                TokenType = (TokenType)source.TokenType
             };
             return result;
         }
@@ -32,7 +33,96 @@ namespace Spotify.Uwp.Internal
                 Refresh = source.Refresh,
                 Scopes = source.Scopes,
                 Token = source.Token,
-                TokenType = source.TokenType
+                TokenType = (NetStandard.Client.Authentication.Enums.TokenType)source.TokenType
+            };
+            return result;
+        }
+
+        public static ImageViewModel MapImage(Image source)
+        {
+            if (source == null) return null;
+            var result = new ImageViewModel()
+            {
+                Url = source.Url,
+                Height = source.Height,
+                Width = source.Width
+            };
+            return result;
+        }
+
+        public static ImageViewModel MapLargeImage(List<ImageViewModel> images) =>
+            images.OrderByDescending(o => o.Height * o.Width).FirstOrDefault();
+
+        public static ImageViewModel MapSmallImage(List<ImageViewModel> images) =>
+           images.OrderBy(o => o.Height * o.Width).FirstOrDefault();
+
+        public static ImageViewModel MapMediumImage(List<ImageViewModel> images)
+        {
+            var small = MapSmallImage(images);
+            var large = MapLargeImage(images);
+            var medium = images.FirstOrDefault
+                (f => f != small || f != large);
+            return medium ?? large;
+        }
+
+        public static CopyrightViewModel MapCopyright(Copyright source)
+        {
+            if (source == null) return null;
+            var result = new CopyrightViewModel()
+            {
+                Text = source.Text,
+                Type = source.Type
+            };
+            return result;
+        }
+
+        public static string MapExternalUrl(ExternalUrl source)
+        {
+            if (source == null) return null;
+            return source?.Spotify;
+        }
+
+        public static ExternalIdViewModel MapExternalId(ExternalId source)
+        {
+            if (source == null) return null;
+            var result = new ExternalIdViewModel()
+            {
+                Ean = source.Ean,
+                Isrc = source.Isrc,
+                Upc = source.Upc
+            };
+            return result;
+        }
+
+        public static PublicUserViewModel MapPublicUser(PublicUser source)
+        {
+            if (source == null) return null;
+            var result = new PublicUserViewModel()
+            {
+                DisplayName = source.DisplayName,
+                ExternalUrl = MapExternalUrl(source.ExternalUrls),
+                Followers = source?.Followers?.Total ?? 0,
+                Href = source.Href,
+                Id = source.Id,
+                Images = source?.Images?.ConvertAll(MapImage),
+                Product = source.Product,
+                Type = source.Type,
+                Uri = source.Uri
+            };
+            return result;
+        }
+
+        public static LinkedTrackViewModel MapLinkedTrack(LinkedTrack source)
+        {
+            if (source == null) return null;
+            var result = new LinkedTrackViewModel()
+            {
+                ExternalUrl = MapExternalUrl(source.ExternalUrls),
+                Href = source.Href,
+                Id = source.Id,
+                Name = source.Name,
+                Type = source.Type,
+                Uri = source.Uri
             };
             return result;
         }
@@ -42,26 +132,10 @@ namespace Spotify.Uwp.Internal
             if (source == null) return null;
             var result = new CategoryViewModel()
             {
-                ExternalUrls = source.ExternalUrls,
+                ExternalUrl = MapExternalUrl(source.ExternalUrls),
                 Href = source.Href,
                 Id = source.Id,
-                Images = source.Images,
-                Name = source.Name,
-                Type = source.Type,
-                Uri = source.Uri
-            };
-            return result;
-        }
-
-        public static Category MapCategory(CategoryViewModel source)
-        {
-            if (source == null) return null;
-            var result = new Category()
-            {
-                ExternalUrls = source.ExternalUrls,
-                Href = source.Href,
-                Id = source.Id,
-                Images = source.Images,
+                Images = source?.Images?.ConvertAll(MapImage),
                 Name = source.Name,
                 Type = source.Type,
                 Uri = source.Uri
@@ -74,12 +148,12 @@ namespace Spotify.Uwp.Internal
             if (source == null) return null;
             var result = new ArtistViewModel()
             {
-                ExternalUrls = source.ExternalUrls,
+                ExternalUrl = MapExternalUrl(source.ExternalUrls),
                 Followers = source.Followers,
                 Genres = source.Genres,
                 Href = source.Href,
                 Id = source.Id,
-                Images = source.Images,
+                Images = source?.Images?.ConvertAll(MapImage),
                 Name = source.Name,
                 Popularity = source.Popularity,
                 Type = source.Type,
@@ -95,22 +169,22 @@ namespace Spotify.Uwp.Internal
             {
                 AlbumGroup = source.AlbumGroup,
                 AlbumType = source.AlbumType,
-                Artists = MapArtistList(source.Artists),
+                Artists = MapArtistList(source?.Artists),
                 AvailableMarkets = source.AvailableMarkets,
-                Copyrights = source.Copyrights,
-                ExternalId = source.ExternalId,
-                ExternalUrls = source.ExternalUrls,
+                Copyrights = source?.Copyrights?.ConvertAll(MapCopyright),
+                ExternalId = MapExternalId(source.ExternalId),
+                ExternalUrl = MapExternalUrl(source.ExternalUrls),
                 Genres = source.Genres,
                 Href = source.Href,
                 Id = source.Id,
-                Images = source.Images,
+                Images = source?.Images?.ConvertAll(MapImage),
                 Label = source.Label,
                 Name = source.Name,
                 Popularity = source.Popularity,
                 ReleaseDate = source.ReleaseDate,
                 ReleaseDatePrecision = source.ReleaseDatePrecision,
                 TotalTracks = source.TotalTracks,
-                Tracks = source.Tracks,
+                Tracks = MapPagingTrack(source.Tracks),
                 Type = source.Type,
                 Uri = source.Uri,
             };
@@ -125,10 +199,10 @@ namespace Spotify.Uwp.Internal
                 AlbumGroup = source.AlbumGroup,
                 AlbumType = source.AlbumType,
                 AvailableMarkets = source.AvailableMarkets,
-                ExternalUrls = source.ExternalUrls,
+                ExternalUrl = MapExternalUrl(source?.ExternalUrls),
                 Href = source.Href,
                 Id = source.Id,
-                Images = source.Images,
+                Images = source?.Images?.ConvertAll(MapImage),
                 Name = source.Name,
                 TotalTracks = source.TotalTracks,
                 Type = source.Type,
@@ -144,16 +218,16 @@ namespace Spotify.Uwp.Internal
             {
                 Collaborative = source.Collaborative,
                 Description = source.Description,
-                ExternalUrls = source.ExternalUrls,
-                Followers = source.Followers,
+                ExternalUrl = MapExternalUrl(source.ExternalUrls),
+                Followers = source?.Followers?.Total ?? 0,
                 Href = source.Href,
                 Id = source.Id,
-                Images = source.Images,
+                Images = source?.Images?.ConvertAll(MapImage),
                 Name = source.Name,
-                Owner = source.Owner,
+                Owner = MapPublicUser(source.Owner),
                 Public = source.Public,
                 SnapshotId = source.SnapshotId,
-                Tracks = source.Tracks,
+                Tracks = MapPagingTrack(source.Tracks),
                 Type = source.Type,
                 Uri = source.Uri
             };
@@ -210,22 +284,22 @@ namespace Spotify.Uwp.Internal
             if (source == null) return null;
             var result = new TrackViewModel()
             {
-                AlbumViewModel = MapAlbum(source.Album),
+                Album = MapAlbum(source.Album),
                 Artists = MapArtistList(source.Artists),
                 AvailableMarkets = source.AvailableMarkets,
                 DiscNumber = source.DiscNumber,
                 Duration = source.Duration,
-                ExternalId = source.ExternalId,
-                ExternalUrls = source.ExternalUrls,
+                ExternalId = MapExternalId(source.ExternalId),
+                ExternalUrl = MapExternalUrl(source.ExternalUrls),
                 Href = source.Href,
                 Id = source.Id,
                 IsExplicit = source.IsExplicit,
                 IsPlayable = source.IsPlayable,
-                LinkedFrom = source.LinkedFrom,
+                LinkedFrom = MapLinkedTrack(source.LinkedFrom),
                 Name = source.Name,
                 Popularity = source.Popularity,
                 Preview = source.Preview,
-                Restrictions = source.Restrictions,
+                Restrictions = source?.Restrictions?.Select(s => s.Reason)?.ToList(),
                 TrackNumber = source.TrackNumber,
                 Type = source.Type,
                 Uri = source.Uri
@@ -241,12 +315,12 @@ namespace Spotify.Uwp.Internal
                 AvailableMarkets = source.AvailableMarkets,
                 DiscNumber = source.DiscNumber,
                 Duration = source.Duration,
-                ExternalUrls = source.ExternalUrls,
+                ExternalUrl = MapExternalUrl(source.ExternalUrls),
                 Href = source.Href,
                 Id = source.Id,
                 IsExplicit = source.IsExplicit,
                 IsPlayable = source.IsPlayable,
-                LinkedFrom = source.LinkedFrom,
+                LinkedFrom = MapLinkedTrack(source.LinkedFrom),
                 Name = source.Name,
                 Preview = source.Preview,
                 TrackNumber = source.TrackNumber,
@@ -284,6 +358,21 @@ namespace Spotify.Uwp.Internal
                 Limit = source.Limit,
                 Offset = source.Offset,
                 Items = source.Items.ConvertAll(MapCategory)
+            };
+            return result;
+        }
+
+        public static NavigationViewModel<TrackViewModel> MapPagingTrack(Paging<SimplifiedTrack> source)
+        {
+            if (source == null) return null;
+            var result = new NavigationViewModel<TrackViewModel>()
+            {
+                Total = source.Total,
+                Next = source.Next,
+                Back = source.Previous,
+                Limit = source.Limit,
+                Offset = source.Offset,
+                Items = source.Items.ConvertAll(MapTrack)
             };
             return result;
         }

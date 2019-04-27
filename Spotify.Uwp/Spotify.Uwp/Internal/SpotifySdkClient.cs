@@ -4,6 +4,7 @@ using Spotify.NetStandard.Client.Interfaces;
 using Spotify.NetStandard.Enums;
 using Spotify.NetStandard.Requests;
 using Spotify.NetStandard.Responses;
+using Spotify.Uwp.Exceptions;
 using Spotify.Uwp.ViewModels;
 using System.Collections.Generic;
 using System.Globalization;
@@ -104,7 +105,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -126,7 +127,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -148,7 +149,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -170,7 +171,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -192,7 +193,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -217,7 +218,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return results;
         }
@@ -241,7 +242,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -283,7 +284,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -306,7 +307,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -355,7 +356,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -378,7 +379,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -420,7 +421,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -443,7 +444,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -462,7 +463,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -521,7 +522,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -544,7 +545,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return result;
         }
@@ -566,7 +567,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-
+                throw new TokenRequiredException(TokenType.Access);
             }
             return results;
         }

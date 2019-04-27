@@ -34,35 +34,35 @@ namespace Spotify.Uwp.Test
         public async Task Test_Get_Category()
         {
             CategoryViewModel item = await _client.GetCategory("decades");
-            Assert.IsNotNull(item?.Id);
+            Assert.IsTrue(item?.Id == "decades");
         }
 
         [TestMethod]
         public async Task Test_Get_Artist()
         {
             ArtistViewModel item = await _client.GetArtist("43ZHCT0cAZBISjO8DG9PnE");
-            Assert.IsNotNull(item?.Id);
+            Assert.IsTrue(item?.Id == "43ZHCT0cAZBISjO8DG9PnE");
         }
 
         [TestMethod]
         public async Task Test_GetAlbum()
         {
             AlbumViewModel item = await _client.GetAlbum("1ZGxGu4fMROqmZsFSoepeE");
-            Assert.IsNotNull(item?.Id);
+            Assert.IsTrue(item?.Id == "1ZGxGu4fMROqmZsFSoepeE");
         }
 
         [TestMethod]
         public async Task Test_GetPlaylist()
         {
             PlaylistViewModel item = await _client.GetPlaylist("37i9dQZF1DXatMjChPKgBk");
-            Assert.IsNotNull(item?.Id);
+            Assert.IsTrue(item?.Id == "37i9dQZF1DXatMjChPKgBk");
         }
 
         [TestMethod]
         public async Task Test_GetTrack()
         {
             TrackViewModel item = await _client.GetTrack("1cTZMwcBJT0Ka3UJPXOeeN");
-            Assert.IsNotNull(item?.Id);
+            Assert.IsTrue(item?.Id == "1cTZMwcBJT0Ka3UJPXOeeN");
         }
         #endregion Get Methods
 

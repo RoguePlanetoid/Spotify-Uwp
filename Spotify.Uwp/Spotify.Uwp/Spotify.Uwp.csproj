@@ -121,6 +121,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
+    <Compile Include="Exceptions\TokenRequiredException.cs" />
     <Compile Include="ISpotifySdkClient.cs" />
     <Compile Include="Internal\SpotifySdkClient.cs" />
     <Compile Include="Internal\RelayCommand.cs" />
@@ -130,6 +131,12 @@
     <Compile Include="ViewModels\AudioFeatureViewModel.cs" />
     <Compile Include="ViewModels\CategoryViewModel.cs" />
     <Compile Include="ViewModels\Commands\ToggleFavouriteViewModel.cs" />
+    <Compile Include="ViewModels\BaseViewModel.cs" />
+    <Compile Include="ViewModels\ContentViewModel.cs" />
+    <Compile Include="ViewModels\CopyrightViewModel.cs" />
+    <Compile Include="ViewModels\ExternalIdViewModel.cs" />
+    <Compile Include="ViewModels\ImageViewModel.cs" />
+    <Compile Include="ViewModels\LinkedTrackViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListAlbumViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListArtistViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListAudioFeatureViewModel.cs" />
@@ -140,6 +147,7 @@
     <Compile Include="ViewModels\Lists\ListTrackViewModel.cs" />
     <Compile Include="ViewModels\NavigationViewModel.cs" />
     <Compile Include="ViewModels\PlaylistViewModel.cs" />
+    <Compile Include="ViewModels\PublicUserViewModel.cs" />
     <Compile Include="ViewModels\RecommendationGenreViewModel.cs" />
     <Compile Include="ViewModels\TokenViewModel.cs" />
     <Compile Include="ViewModels\TrackViewModel.cs" />

@@ -1,4 +1,5 @@
 ﻿using Spotify.NetStandard.Responses;
+using Spotify.Uwp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,20 +16,20 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="images"></param>
         /// <returns></returns>
-        public static Image GetLargeImage(this List<Image> images) =>
-            images.OrderByDescending(o => o.Height * o.Width).FirstOrDefault();
+        public static ImageViewModel GetLargeImage(this List<Image> images) =>
+            Mapping.MapImage(images.OrderByDescending(o => o.Height * o.Width).FirstOrDefault());
 
         /// <summary>
         /// Medium Image
         /// </summary>
         /// <param name="images"></param>
         /// <returns></returns>
-        public static Image GetMediumImage(this List<Image> images)
+        public static ImageViewModel GetMediumImage(this List<Image> images)
         {
             var small = GetSmallImage(images);
             var large = GetLargeImage(images);
-            var medium = images.FirstOrDefault
-                (f => f != small || f != large);
+            var medium = Mapping.MapImage(images.FirstOrDefault
+                (f => Mapping.MapImage(f) != small || Mapping.MapImage(f) != large));
             return medium ?? large;
         }
 
@@ -37,8 +38,8 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="images"></param>
         /// <returns></returns>
-        public static Image GetSmallImage(this List<Image> images) =>
-            images.OrderBy(o => o.Height * o.Width).FirstOrDefault();
+        public static ImageViewModel GetSmallImage(this List<Image> images) =>
+            Mapping.MapImage(images.OrderBy(o => o.Height * o.Width).FirstOrDefault());
 
         /// <summary>
         /// Get Artist

@@ -1,6 +1,12 @@
 ﻿namespace Spotify.Uwp
 {
     #region Public Enums
+    public enum TokenType : byte
+    {
+        Access,
+        User
+    }
+
     public enum PlaylistType
     {
         Search,
