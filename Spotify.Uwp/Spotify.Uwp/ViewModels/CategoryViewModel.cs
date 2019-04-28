@@ -3,5 +3,5 @@
     /// <summary>
     /// Category View Model
     /// </summary>
-    public class CategoryViewModel : ContentViewModel { }
+    public class CategoryViewModel : AssetViewModel { }
 }

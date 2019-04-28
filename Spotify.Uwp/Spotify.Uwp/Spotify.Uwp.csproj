@@ -128,6 +128,8 @@
     <Compile Include="SpotifySdkFactory.cs" />
     <Compile Include="ViewModels\AlbumViewModel.cs" />
     <Compile Include="ViewModels\ArtistViewModel.cs" />
+    <Compile Include="ViewModels\AssetViewModel.cs" />
+    <Compile Include="ViewModels\AudioAnalysisViewModel.cs" />
     <Compile Include="ViewModels\AudioFeatureViewModel.cs" />
     <Compile Include="ViewModels\CategoryViewModel.cs" />
     <Compile Include="ViewModels\Commands\ToggleFavouriteViewModel.cs" />
@@ -149,6 +151,9 @@
     <Compile Include="ViewModels\PlaylistViewModel.cs" />
     <Compile Include="ViewModels\PublicUserViewModel.cs" />
     <Compile Include="ViewModels\RecommendationGenreViewModel.cs" />
+    <Compile Include="ViewModels\SectionViewModel.cs" />
+    <Compile Include="ViewModels\SegmentViewModel.cs" />
+    <Compile Include="ViewModels\TimeIntervalViewModel.cs" />
     <Compile Include="ViewModels\TokenViewModel.cs" />
     <Compile Include="ViewModels\TrackViewModel.cs" />
     <Compile Include="Internal\Extensions.cs" />

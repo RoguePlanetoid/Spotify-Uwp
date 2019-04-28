@@ -3,7 +3,7 @@
     /// <summary>
     /// Public User View Model
     /// </summary>
-    public class PublicUserViewModel : ContentViewModel
+    public class PublicUserViewModel : AssetViewModel
     {
         /// <summary>
         /// The name displayed on the user’s profile. null if not available.

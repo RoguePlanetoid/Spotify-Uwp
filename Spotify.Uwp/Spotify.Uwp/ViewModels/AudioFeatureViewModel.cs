@@ -3,13 +3,8 @@
     /// <summary>
     /// Audio Feature View Model
     /// </summary>
-    public class AudioFeatureViewModel
+    public class AudioFeatureViewModel : ContentViewModel
     {
-        /// <summary>
-        /// Name
-        /// </summary>
-        public string Name { get; set; }
-
         /// <summary>
         /// Value
         /// </summary>

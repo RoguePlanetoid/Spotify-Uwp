@@ -7,7 +7,7 @@ namespace Spotify.Uwp.ViewModels
     /// <summary>
     /// Album View Model
     /// </summary>
-    public class AlbumViewModel : ContentViewModel
+    public class AlbumViewModel : AssetViewModel
     {
         /// <summary>
         /// The field is present when getting an artist’s albums. Possible values are “album”, “single”, “compilation”, “appears_on”.

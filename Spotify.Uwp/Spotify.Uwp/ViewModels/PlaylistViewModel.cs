@@ -3,7 +3,7 @@
     /// <summary>
     /// Playlist View Model
     /// </summary>
-    public class PlaylistViewModel : ContentViewModel
+    public class PlaylistViewModel : AssetViewModel
     {
         /// <summary>
         /// true if the owner allows other users to modify the playlist.

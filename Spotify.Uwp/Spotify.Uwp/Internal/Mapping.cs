@@ -3,10 +3,12 @@ using Spotify.NetStandard.Responses;
 using Spotify.Uwp.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Spotify.Uwp.Internal
 {
+    /// <summary>
+    /// Mapping
+    /// </summary>
     internal static class Mapping
     {
         #region Public Methods
@@ -332,6 +334,71 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
+        public static TimeIntervalViewModel MapTimeInterval(TimeInterval source)
+        {
+            if (source == null) return null;
+            var result = new TimeIntervalViewModel()
+            {
+                Confidence = source.Confidence,
+                Duration = source.Duration,
+                Start = source.Start
+            };
+            return result;
+        }
+
+        public static SegmentViewModel MapSegment(Segment source)
+        {
+            if (source == null) return null;
+            var result = new SegmentViewModel()
+            {
+                Confidence = source.Confidence,
+                Duration = source.Duration,
+                LoudnessEnd = source.Duration,
+                LoudnessMax = source.LoudnessMax,
+                LoudnessMaxTime = source.LoudnessMaxTime,
+                LoudnessStart = source.LoudnessStart,
+                Pitches = source.Pitches,
+                Start = source.Start,
+                Timbre = source.Timbre
+            };
+            return result;
+        }
+
+        public static SectionViewModel MapSection(Section source)
+        {
+            if (source == null) return null;
+            var result = new SectionViewModel()
+            {
+                Confidence = source.Confidence,
+                Duration = source.Duration,
+                Key = source.Key,
+                KeyConfidence = source.KeyConfidence,
+                Loudness = source.Loudness,
+                Mode = source.Mode,
+                ModeConfidence = source.ModeConfidence,
+                Start = source.Start,
+                Tempo = source.Tempo,
+                TempoConfidence = source.TempoConfidence,
+                TimeSignature = source.TimeSignature,
+                TimeSignatureConfidence = source.TimeSignatureConfidence
+            };
+            return result;
+        }
+
+        public static AudioAnalysisViewModel MapAudioAnalysis(AudioAnalysis source)
+        {
+            if (source == null) return null;
+            var result = new AudioAnalysisViewModel()
+            {
+                Bars = source?.Bars?.ConvertAll(MapTimeInterval),
+                Beats = source?.Beats?.ConvertAll(MapTimeInterval),
+                Sections = source?.Sections?.ConvertAll(MapSection),
+                Segments = source?.Segments?.ConvertAll(MapSegment),
+                Tatums = source?.Tatums?.ConvertAll(MapTimeInterval)
+            };
+            return result;
+        }
+
         public static NavigationViewModel<CategoryViewModel> MapPagingCategory(Paging<Category> source)
         {
             if (source == null) return null;
@@ -513,11 +580,17 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static List<AudioFeatureViewModel> MapAudioFeatureList(AudioFeatures source)
+        public static List<AudioFeatureViewModel> MapAudioFeature(AudioFeatures source)
         {
+            if (source == null) return null;
             AudioFeatureViewModel MapAudioFeature(string name, float? value) =>
             new AudioFeatureViewModel()
             {
+                Id = source.Id,
+                Href = source.TrackHref,
+                ExternalUrl = source.AnalysisUrl,
+                Uri = source.Uri,
+                Type = source.Type,                
                 Name = name,
                 Value = (int)((value ?? 0) * 100)
             };
@@ -538,6 +611,12 @@ namespace Spotify.Uwp.Internal
                 MapAudioFeature($"Meter:{source.TimeSignature}", 1.0f)
             };
             return results;
+        }
+
+        public static List<List<AudioFeatureViewModel>> MapAudioFeature(List<AudioFeatures> source)
+        {
+            if (source == null) return null;
+            return source.ConvertAll(MapAudioFeature);
         }
         #endregion Public Methods
     }

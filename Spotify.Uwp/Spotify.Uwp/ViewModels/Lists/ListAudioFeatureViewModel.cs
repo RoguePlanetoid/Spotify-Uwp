@@ -18,7 +18,7 @@ namespace Spotify.Uwp.ViewModels
         private async void Init(
             string id)
         {
-            var response = await _client.ListAudioFeatures(id);
+            var response = await _client.ListAudioFeatureAsync(id);
             response.ForEach(f => Add(f));
         }
         #endregion Private Methods

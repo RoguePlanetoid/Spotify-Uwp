@@ -6,7 +6,7 @@ namespace Spotify.Uwp.ViewModels
     /// <summary>
     /// Artist View Model
     /// </summary>
-    public class ArtistViewModel : ContentViewModel
+    public class ArtistViewModel : AssetViewModel
     {
         /// <summary>
         /// Information about the followers of the artist.

@@ -17,27 +17,27 @@ namespace Spotify.Uwp
         ISpotifyClient SpotifyClient { get; }
 
         /// <summary>
-        /// Locale Code
-        /// </summary>
-        string Locale { get; set; }
-
-        /// <summary>
-        /// Country Code
+        /// ISO 3166-1 alpha-2 country code e.g. GB
         /// </summary>
         string Country { get; set; }
 
         /// <summary>
-        /// Limit Value
+        /// ISO 639-1 language code and an ISO 3166-1 alpha-2 country code, joined by an underscore e.g. en_GB
+        /// </summary>
+        string Locale { get; set; }
+
+        /// <summary>
+        /// Number of items to return per request
         /// </summary>
         int? Limit { get; set; }
 
         /// <summary>
-        /// Token
+        /// Token View Model
         /// </summary>
         TokenViewModel Token { get; set; }
 
         /// <summary>
-        /// Favourites
+        /// List Favourite ViewModel 
         /// </summary>
         ListFavouriteViewModel Favourites { get; set; }
         #endregion Public Properties
@@ -48,40 +48,48 @@ namespace Spotify.Uwp
         /// </summary>
         /// <param name="id">Category Id</param>
         /// <param name="page">Page</param>
-        /// <returns>CategoryViewModel</returns>
-        Task<CategoryViewModel> GetCategory(
+        /// <returns>Category ViewModel</returns>
+        Task<CategoryViewModel> GetCategoryAsync(
             string id);
 
         /// <summary>
         /// Get Artist
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<ArtistViewModel> GetArtist(
+        /// <param name="id">Artist Spotify Id</param>
+        /// <returns>Artist ViewModel</returns>
+        Task<ArtistViewModel> GetArtistAsync(
             string id);
 
         /// <summary>
         /// Get Album
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<AlbumViewModel> GetAlbum(
+        /// <param name="id">Album Spotify Id</param>
+        /// <returns>Album View Model</returns>
+        Task<AlbumViewModel> GetAlbumAsync(
             string id);
 
         /// <summary>
         /// Get Playlist
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<PlaylistViewModel> GetPlaylist(
+        /// <param name="id">Playlist Spotify Id</param>
+        /// <returns>Playlist ViewModel</returns>
+        Task<PlaylistViewModel> GetPlaylistAsync(
             string id);
 
         /// <summary>
         /// Get Track
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<TrackViewModel> GetTrack(
+        /// <param name="id">Track Spotify Id</param>
+        /// <returns>Track ViewModel</returns>
+        Task<TrackViewModel> GetTrackAsync(
+            string id);
+
+        /// <summary>
+        /// Get Audio Analysis
+        /// </summary>
+        /// <param name="id">Track Spotify Id</param>
+        /// <returns>AudioAnalysis ViewModel</returns>
+        Task<AudioAnalysisViewModel> GetAudioAnalysisAsync(
             string id);
         #endregion Get Methods
 
@@ -89,105 +97,115 @@ namespace Spotify.Uwp
         /// <summary>
         /// List Category
         /// </summary>
-        /// <param name="limit">Limit</param>
-        /// <returns>Page</returns>
+        /// <returns>Navigation ViewModel of Category ViewModel</returns>
         Task<NavigationViewModel<CategoryViewModel>>
-            ListCategories();
+            ListCategoriesAsync();
 
         /// <summary>
         /// List Categories
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <param name="country"></param>
-        /// <returns>Page</returns>
+        /// <param name="navigation">Navigation ViewModel of Category ViewModel</param>
+        /// <returns>Navigation ViewModel of Category ViewModel</returns>
         Task<NavigationViewModel<CategoryViewModel>>
-            ListCategories(NavigationViewModel<CategoryViewModel> navigation);
+            ListCategoriesAsync(NavigationViewModel<CategoryViewModel> navigation);
 
         /// <summary>
         /// List Artists
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <returns>Page</returns>
+        /// <param name="type">Artist Type</param>
+        /// <param name="id">Artist Spotify Id</param>
+        /// <returns>Navigation ViewModel of Artist ViewModel</returns>
         Task<NavigationViewModel<ArtistViewModel>>
-            ListArtists(
+            ListArtistsAsync(
             ArtistType type,
             string id = null);
 
         /// <summary>
         /// List Artists
         /// </summary>
-        /// <param name="navigation">Navigation</param>
-        /// <returns>Page</returns>
-        Task<NavigationViewModel<ArtistViewModel>> ListArtists(
+        /// <param name="navigation">Navigation ViewModel of Artist ViewModel</param>
+        /// <returns>Navigation ViewModel of Artist ViewModel</returns>
+        Task<NavigationViewModel<ArtistViewModel>> ListArtistsAsync(
             NavigationViewModel<ArtistViewModel> navigation);
 
         /// <summary>
         /// List Albums
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <returns>Page</returns>
+        /// <param name="type">Album Type</param>
+        /// <param name="id">Album Spotify Id</param>
+        /// <returns>Navigation ViewModel of Album ViewModel</returns>
         Task<NavigationViewModel<AlbumViewModel>>
-            ListAlbums(
+            ListAlbumsAsync(
             AlbumType type,
             string id = null);
 
         /// <summary>
         /// List Albums
         /// </summary>
-        /// <param name="navigation">Navigation</param>
-        /// <returns>Page</returns>
-        Task<NavigationViewModel<AlbumViewModel>> ListAlbums(
+        /// <param name="navigation">Navigation ViewModel of Album ViewModel</param>
+        /// <returns>Navigation ViewModel of Album ViewModel</returns>
+        Task<NavigationViewModel<AlbumViewModel>> ListAlbumsAsync(
             NavigationViewModel<AlbumViewModel> navigation);
 
         /// <summary>
         /// List Playlists
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <returns>Page</returns>
+        /// <param name="type">Playlist Type</param>
+        /// <param name="id">Playlist Spotify Id</param>
+        /// <returns>Navigation ViewModel of Playlist ViewModel</returns>
         Task<NavigationViewModel<PlaylistViewModel>>
-            ListPlaylists(
+            ListPlaylistsAsync(
             PlaylistType type,
             string id = null);
 
         /// <summary>
         /// List Playlists
         /// </summary>
-        /// <param name="paging">Paging</param>
-        /// <returns>Page</returns>
-        Task<NavigationViewModel<PlaylistViewModel>> ListPlaylists(
+        /// <param name="navigation">Navigation ViewModel of Playlist ViewModel</param>
+        /// <returns>Navigation ViewModel of Playlist ViewModel</returns>
+        Task<NavigationViewModel<PlaylistViewModel>> ListPlaylistsAsync(
             NavigationViewModel<PlaylistViewModel> navigation);
 
         /// <summary>
         /// List Recommendation Genres
         /// </summary>
-        /// <returns></returns>
-        Task<List<RecommendationViewModel>> ListRecommendationGenres();
+        /// <returns>List of Recommendation ViewModel</returns>
+        Task<List<RecommendationViewModel>> ListRecommendationGenresAsync();
 
         /// <summary>
         /// List Tracks
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <returns>Page</returns>
+        /// <param name="type">Track Type</param>
+        /// <param name="id">Track Spotify Id</param>
+        /// <returns>Navigation ViewModel of Track ViewModel</returns>
         Task<NavigationViewModel<TrackViewModel>>
-            ListTracks(
+            ListTracksAsync(
             TrackType type,
             string id = null);
 
         /// <summary>
         /// List Tracks
         /// </summary>
-        /// <param name="paging">Paging</param>
-        /// <returns>Page</returns>
-        Task<NavigationViewModel<TrackViewModel>> ListTracks(
+        /// <param name="navigation">Navigation ViewModel of Track ViewModel</param>
+        /// <returns>Navigation ViewModel of Track ViewModel</returns>
+        Task<NavigationViewModel<TrackViewModel>> ListTracksAsync(
             NavigationViewModel<TrackViewModel> navigation);
 
         /// <summary>
         /// List Audio Features
         /// </summary>
-        /// <param name="id">Id</param>
-        /// <returns></returns>
-        Task<List<AudioFeatureViewModel>> ListAudioFeatures(
+        /// <param name="id">Track Spotify Id</param>
+        /// <returns>List of AudioFeatureViewModel</returns>
+        Task<List<AudioFeatureViewModel>> ListAudioFeatureAsync(
             string id);
+
+        /// <summary>
+        /// List Audio Features
+        /// </summary>
+        /// <param name="ids">List of Track Spotify Id</param>
+        /// <returns>List of List of AudioFeature ViewModel</returns>
+        Task<List<List<AudioFeatureViewModel>>> ListAudioFeaturesAsync(
+            List<string> ids);
         #endregion List Methods   
     }
 }

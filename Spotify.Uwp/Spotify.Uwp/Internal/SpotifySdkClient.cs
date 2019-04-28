@@ -17,26 +17,9 @@ namespace Spotify.Uwp.Internal
     /// </summary>
     internal class SpotifySdkClient : ISpotifySdkClient
     {
-        #region Private Methods
-        /// <summary>
-        /// Init
-        /// </summary>
-        private void Init(CultureInfo culture)
-        {
-            if (culture != null)
-            {
-                var region = new RegionInfo(culture.LCID);
-                if (Country == null)
-                    Country = region.TwoLetterISORegionName;
-                if (Locale == null)
-                    Locale = $"{culture.TwoLetterISOLanguageName.ToLower()}_{region.TwoLetterISORegionName.ToUpper()}";
-            }
-        }
-        #endregion Private Methods
-
         #region Constructor
         /// <summary>
-        /// Spotify SDK
+        /// Spotify SDK Client
         /// </summary>
         /// <param name="clientId">Spotify Client Id</param>
         /// <param name="clientSecret">Spotify Client Secret</param>
@@ -46,8 +29,33 @@ namespace Spotify.Uwp.Internal
             string clientSecret,
             CultureInfo cultureInfo = null)
         {
-            Favourites = new ListFavouriteViewModel();
-            Init(cultureInfo);
+            if (cultureInfo != null)
+            {
+                var region = new RegionInfo(cultureInfo.LCID);
+                if (Country == null)
+                    Country = region.TwoLetterISORegionName;
+                if (Locale == null)
+                    Locale = $"{cultureInfo.TwoLetterISOLanguageName.ToLower()}_{region.TwoLetterISORegionName.ToUpper()}";
+            }
+            SpotifyClient = SpotifyClientFactory.CreateSpotifyClient(
+                clientId, clientSecret);
+        }
+
+        /// <summary>
+        /// Spotify SDK Client
+        /// </summary>
+        /// <param name="clientId">Spotify Client Id</param>
+        /// <param name="clientSecret">Spotify Client Secret</param>
+        /// <param name="country">ISO 3166-1 alpha-2 country code e.g. GB</param>
+        /// <param name="locale">ISO 639-1 language code and an ISO 3166-1 alpha-2 country code, joined by an underscore e.g. en_GB</param>
+        public SpotifySdkClient(
+            string clientId,
+            string clientSecret,
+            string country = null,
+            string locale = null)
+        {
+            Country = country;
+            Locale = locale;
             SpotifyClient = SpotifyClientFactory.CreateSpotifyClient(
                 clientId, clientSecret);
         }
@@ -60,27 +68,33 @@ namespace Spotify.Uwp.Internal
         public ISpotifyClient SpotifyClient { get; }
 
         /// <summary>
-        /// Locale Code
-        /// </summary>
-        public string Locale { get; set; } = null;
-
-        /// <summary>
-        /// Country Code
+        /// ISO 3166-1 alpha-2 country code e.g. GB
         /// </summary>
         public string Country { get; set; } = null;
 
         /// <summary>
-        /// Limit Value
+        /// ISO 639-1 language code and an ISO 3166-1 alpha-2 country code, joined by an underscore e.g. en_GB
+        /// </summary>
+        public string Locale { get; set; } = null;
+
+        /// <summary>
+        /// Number of items to return per request
         /// </summary>
         public int? Limit { get; set; } = null;
 
+        /// <summary>
+        /// Token View Model
+        /// </summary>
         public TokenViewModel Token
         {
             get => Mapping.MapToken(SpotifyClient.GetToken());
             set => SpotifyClient.SetToken(Mapping.MapToken(value));
         }
 
-        public ListFavouriteViewModel Favourites { get; set; }
+        /// <summary>
+        /// List Favourite ViewModel 
+        /// </summary>
+        public ListFavouriteViewModel Favourites { get; set; } = new ListFavouriteViewModel();
         #endregion Public Properties
 
         #region Get Methods
@@ -89,8 +103,8 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="id">Category Id</param>
         /// <param name="page">Page</param>
-        /// <returns>CategoryViewModel</returns>
-        public async Task<CategoryViewModel> GetCategory(
+        /// <returns>Category ViewModel</returns>
+        public async Task<CategoryViewModel> GetCategoryAsync(
             string id)
         {
             CategoryViewModel result = null;
@@ -113,9 +127,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// Get Artist
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<ArtistViewModel> GetArtist(
+        /// <param name="id">Artist Spotify Id</param>
+        /// <returns>Artist ViewModel</returns>
+        public async Task<ArtistViewModel> GetArtistAsync(
             string id)
         {
             ArtistViewModel result = null;
@@ -135,9 +149,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// Get Album
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<AlbumViewModel> GetAlbum(
+        /// <param name="id">Album Spotify Id</param>
+        /// <returns>Album View Model</returns>
+        public async Task<AlbumViewModel> GetAlbumAsync(
             string id)
         {
             AlbumViewModel result = null;
@@ -157,9 +171,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// Get Playlist
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<PlaylistViewModel> GetPlaylist(
+        /// <param name="id">Playlist Spotify Id</param>
+        /// <returns>Playlist ViewModel</returns>
+        public async Task<PlaylistViewModel> GetPlaylistAsync(
             string id)
         {
             PlaylistViewModel result = null;
@@ -179,9 +193,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// Get Track
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<TrackViewModel> GetTrack(
+        /// <param name="id">Track Spotify Id</param>
+        /// <returns>Track ViewModel</returns>
+        public async Task<TrackViewModel> GetTrackAsync(
             string id)
         {
             TrackViewModel result = null;
@@ -197,16 +211,37 @@ namespace Spotify.Uwp.Internal
             }
             return result;
         }
+
+        /// <summary>
+        /// Get Audio Analysis
+        /// </summary>
+        /// <param name="id">Track Spotify Id</param>
+        /// <returns>AudioAnalysis ViewModel</returns>
+        public async Task<AudioAnalysisViewModel> GetAudioAnalysisAsync(
+            string id)
+        {
+            AudioAnalysisViewModel result = null;
+            try
+            {
+                var response = await SpotifyClient.LookupAsync<AudioAnalysis>(
+                id, LookupType.AudioAnalysis);
+                result = Mapping.MapAudioAnalysis(response);
+            }
+            catch (AuthAccessTokenRequiredException)
+            {
+                throw new TokenRequiredException(TokenType.Access);
+            }
+            return result;
+        }
         #endregion Get Methods
 
         #region List Methods
         /// <summary>
         /// List Category
         /// </summary>
-        /// <param name="limit">Limit</param>
-        /// <returns>Page</returns>
+        /// <returns>Navigation ViewModel of Category ViewModel</returns>
         public async Task<NavigationViewModel<CategoryViewModel>>
-            ListCategories()
+            ListCategoriesAsync()
         {
             NavigationViewModel<CategoryViewModel> results = null;
             try
@@ -226,11 +261,10 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Categories
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <param name="country"></param>
-        /// <returns>Page</returns>
+        /// <param name="navigation">Navigation ViewModel of Category ViewModel</param>
+        /// <returns>Navigation ViewModel of Category ViewModel</returns>
         public async Task<NavigationViewModel<CategoryViewModel>>
-            ListCategories(NavigationViewModel<CategoryViewModel> navigation)
+            ListCategoriesAsync(NavigationViewModel<CategoryViewModel> navigation)
         {
             NavigationViewModel<CategoryViewModel> result = null;
             try
@@ -250,10 +284,11 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Artists
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <returns>Page</returns>
+        /// <param name="type">Artist Type</param>
+        /// <param name="id">Artist Spotify Id</param>
+        /// <returns>Navigation ViewModel of Artist ViewModel</returns>
         public async Task<NavigationViewModel<ArtistViewModel>>
-            ListArtists(
+            ListArtistsAsync(
             ArtistType type,
             string id = null)
         {
@@ -292,9 +327,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Artists
         /// </summary>
-        /// <param name="navigation">Navigation</param>
-        /// <returns>Page</returns>
-        public async Task<NavigationViewModel<ArtistViewModel>> ListArtists(
+        /// <param name="navigation">Navigation ViewModel of Artist ViewModel</param>
+        /// <returns>Navigation ViewModel of Artist ViewModel</returns>
+        public async Task<NavigationViewModel<ArtistViewModel>> ListArtistsAsync(
             NavigationViewModel<ArtistViewModel> navigation)
         {
             NavigationViewModel<ArtistViewModel> result = null;
@@ -315,10 +350,11 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Albums
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <returns>Page</returns>
+        /// <param name="type">Album Type</param>
+        /// <param name="id">Album Spotify Id</param>
+        /// <returns>Navigation ViewModel of Album ViewModel</returns>
         public async Task<NavigationViewModel<AlbumViewModel>>
-            ListAlbums(
+            ListAlbumsAsync(
             AlbumType type,
             string id = null)
         {
@@ -364,9 +400,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Albums
         /// </summary>
-        /// <param name="navigation">Navigation</param>
-        /// <returns>Page</returns>
-        public async Task<NavigationViewModel<AlbumViewModel>> ListAlbums(
+        /// <param name="navigation">Navigation ViewModel of Album ViewModel</param>
+        /// <returns>Navigation ViewModel of Album ViewModel</returns>
+        public async Task<NavigationViewModel<AlbumViewModel>> ListAlbumsAsync(
             NavigationViewModel<AlbumViewModel> navigation)
         {
             NavigationViewModel<AlbumViewModel> result = null;
@@ -387,10 +423,11 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Playlists
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <returns>Page</returns>
+        /// <param name="type">Playlist Type</param>
+        /// <param name="id">Playlist Spotify Id</param>
+        /// <returns>Navigation ViewModel of Playlist ViewModel</returns>
         public async Task<NavigationViewModel<PlaylistViewModel>>
-            ListPlaylists(
+            ListPlaylistsAsync(
             PlaylistType type,
             string id = null)
         {
@@ -429,9 +466,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Playlists
         /// </summary>
-        /// <param name="paging">Paging</param>
-        /// <returns>Page</returns>
-        public async Task<NavigationViewModel<PlaylistViewModel>> ListPlaylists(
+        /// <param name="navigation">Navigation ViewModel of Playlist ViewModel</param>
+        /// <returns>Navigation ViewModel of Playlist ViewModel</returns>
+        public async Task<NavigationViewModel<PlaylistViewModel>> ListPlaylistsAsync(
             NavigationViewModel<PlaylistViewModel> navigation)
         {
             NavigationViewModel<PlaylistViewModel> result = null;
@@ -452,8 +489,8 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Recommendation Genres
         /// </summary>
-        /// <returns></returns>
-        public async Task<List<RecommendationViewModel>> ListRecommendationGenres()
+        /// <returns>List of Recommendation ViewModel</returns>
+        public async Task<List<RecommendationViewModel>> ListRecommendationGenresAsync()
         {
             List<RecommendationViewModel> result = null;
             try
@@ -471,10 +508,11 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Tracks
         /// </summary>
-        /// <param name="page">Page</param>
-        /// <returns>Page</returns>
+        /// <param name="type">Track Type</param>
+        /// <param name="id">Track Spotify Id</param>
+        /// <returns>Navigation ViewModel of Track ViewModel</returns>
         public async Task<NavigationViewModel<TrackViewModel>>
-            ListTracks(
+            ListTracksAsync(
             TrackType type,
             string id = null)
         {
@@ -530,9 +568,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Tracks
         /// </summary>
-        /// <param name="paging">Paging</param>
-        /// <returns>Page</returns>
-        public async Task<NavigationViewModel<TrackViewModel>> ListTracks(
+        /// <param name="navigation">Navigation ViewModel of Track ViewModel</param>
+        /// <returns>Navigation ViewModel of Track ViewModel</returns>
+        public async Task<NavigationViewModel<TrackViewModel>> ListTracksAsync(
             NavigationViewModel<TrackViewModel> navigation)
         {
             NavigationViewModel<TrackViewModel> result = null;
@@ -553,9 +591,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Audio Features
         /// </summary>
-        /// <param name="id">Id</param>
-        /// <returns></returns>
-        public async Task<List<AudioFeatureViewModel>> ListAudioFeatures(
+        /// <param name="id">Track Spotify Id</param>
+        /// <returns>List of AudioFeatureViewModel</returns>
+        public async Task<List<AudioFeatureViewModel>> ListAudioFeatureAsync(
             string id)
         {
             List<AudioFeatureViewModel> results = null;
@@ -563,7 +601,29 @@ namespace Spotify.Uwp.Internal
             {
                 var response = await SpotifyClient.LookupAsync<AudioFeatures>(
                     id, LookupType.AudioFeatures);
-                results = Mapping.MapAudioFeatureList(response);
+                results = Mapping.MapAudioFeature(response);
+            }
+            catch (AuthAccessTokenRequiredException)
+            {
+                throw new TokenRequiredException(TokenType.Access);
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// List Audio Features
+        /// </summary>
+        /// <param name="ids">List of Track Spotify Id</param>
+        /// <returns>List of List of AudioFeature ViewModel</returns>
+        public async Task<List<List<AudioFeatureViewModel>>> ListAudioFeaturesAsync(
+            List<string> ids)
+        {
+            List<List<AudioFeatureViewModel>> results = null;
+            try
+            {
+                var response = await SpotifyClient.LookupAsync(
+                    ids, LookupType.AudioFeatures);
+                results = Mapping.MapAudioFeature(response.AudioFeatures);
             }
             catch (AuthAccessTokenRequiredException)
             {

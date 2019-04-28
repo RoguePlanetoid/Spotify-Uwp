@@ -27,7 +27,7 @@ namespace Spotify.Uwp.ViewModels
             ArtistType type,
             string id = null)
         {
-            _results = await _client.ListArtists(type, id);
+            _results = await _client.ListArtistsAsync(type, id);
             _count = _results?.Items?.Count ?? 0;
             if (_count > 0)
             {
@@ -62,7 +62,7 @@ namespace Spotify.Uwp.ViewModels
         {
             return AsyncInfo.Run(async (task) =>
             {
-                _results = await _client.ListArtists(_results);
+                _results = await _client.ListArtistsAsync(_results);
                 _count = _results?.Items?.Count ?? 0;
                 if (_count > 0)
                     _results?.Items?.ForEach(item => Add(item));

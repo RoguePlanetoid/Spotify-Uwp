@@ -19,7 +19,7 @@ namespace Spotify.Uwp.ViewModels
         /// </summary>
         private async void Init()
         {
-            var response = await _client.ListRecommendationGenres();
+            var response = await _client.ListRecommendationGenresAsync();
             response.ForEach(f => Add(f));
         }
         #endregion Private Methods

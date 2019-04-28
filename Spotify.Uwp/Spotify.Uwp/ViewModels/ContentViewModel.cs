@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Spotify.Uwp.Internal;
-
-namespace Spotify.Uwp.ViewModels
+﻿namespace Spotify.Uwp.ViewModels
 {
     /// <summary>
     /// Content View Model
@@ -17,25 +14,5 @@ namespace Spotify.Uwp.ViewModels
         /// The name of the content
         /// </summary>
         public string Name { get; set; }
-
-        /// <summary>
-        /// Images in various sizes, widest first.
-        /// </summary>
-        public IList<ImageViewModel> Images { get; set; }
-
-        /// <summary>
-        /// Large Image
-        /// </summary>
-        public ImageViewModel Large => Images.GetLargeImage();
-
-        /// <summary>
-        /// Medium Image
-        /// </summary>
-        public ImageViewModel Medium => Images.GetMediumImage();
-
-        /// <summary>
-        /// Small Image
-        /// </summary>
-        public ImageViewModel Small => Images.GetSmallImage();
     }
 }
