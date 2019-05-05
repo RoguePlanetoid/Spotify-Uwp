@@ -7,7 +7,6 @@
     <owners>RoguePlanetoid</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <description>Spotify SDK UWP Library</description>
     <releaseNotes>Alpha Version</releaseNotes>
     <repository url="https://github.com/RoguePlanetoid/Spotify-Uwp" />
