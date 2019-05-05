@@ -22,6 +22,27 @@ namespace Spotify.Uwp.ViewModels
 
         #region Public Methods
         /// <summary>
+        /// Set
+        /// </summary>
+        /// <param name="type">Favourite Type</param>
+        /// <param name="items">Items</param>
+        public void Set(FavouriteType type, List<string> items)
+        {
+            switch (type)
+            {
+                case FavouriteType.Album:
+                    AlbumIds = items;
+                    break;
+                case FavouriteType.Artist:
+                    ArtistIds = items;
+                    break;
+                case FavouriteType.Track:
+                    TrackIds = items;
+                    break;
+            }
+        }
+
+        /// <summary>
         /// Add
         /// </summary>
         /// <param name="type">Type</param>

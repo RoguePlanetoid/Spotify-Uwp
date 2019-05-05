@@ -228,5 +228,63 @@ namespace Spotify.Uwp.Test
             Assert.IsTrue(items.Count > 0);
         }
         #endregion List Methods
+
+        #region List View Models
+        [TestMethod]
+        public async Task Test_ListAlbumViewModel()
+        {
+            var items = await new ListAlbumViewModel(_client)
+                .Set(AlbumType.NewReleases);
+            Assert.IsNotNull(items);
+        }
+
+        [TestMethod]
+        public async Task Test_ListArtistViewModel()
+        {
+            var items = await new ListArtistViewModel(_client)
+                .Set(ArtistType.Search, "Mike Oldfield");
+            Assert.IsNotNull(items);
+        }
+
+        [TestMethod]
+        public async Task Test_ListAudioFeatureViewModel()
+        {
+            var items = await new ListAudioFeatureViewModel(_client)
+                .Set("3n3Ppam7vgaVa1iaRUc9Lp");
+            Assert.IsNotNull(items);
+        }
+
+        [TestMethod]
+        public async Task Test_ListCategoryViewModel()
+        {
+            var items = await new ListCategoryViewModel(_client)
+                .Set();
+            Assert.IsNotNull(items);
+        }
+
+        [TestMethod]
+        public async Task Test_ListPlaylistViewModel()
+        {
+            var items = await new ListPlaylistViewModel(_client)
+                .Set(PlaylistType.Featured);
+            Assert.IsNotNull(items);
+        }
+
+        [TestMethod]
+        public async Task Test_ListRecommendationViewModel()
+        {
+            var items = await new ListRecommendationViewModel(_client)
+                .Set();
+            Assert.IsNotNull(items);
+        }
+
+        [TestMethod]
+        public async Task Test_ListTrackViewModel()
+        {
+            var items = await new ListTrackViewModel(_client)
+                .Set(TrackType.Search, "Tubular Bells");
+            Assert.IsNotNull(items);
+        }
+        #endregion List View Models
     }
 }

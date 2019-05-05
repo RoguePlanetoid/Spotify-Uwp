@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace Spotify.Uwp.ViewModels
 {
@@ -13,29 +14,25 @@ namespace Spotify.Uwp.ViewModels
         private ISpotifySdkClient _client = null;
         #endregion Private Members
 
-        #region Private Methods
-        /// <summary>
-        /// Init
-        /// </summary>
-        private async void Init()
-        {
-            var response = await _client.ListRecommendationGenresAsync();
-            response.ForEach(f => Add(f));
-        }
-        #endregion Private Methods
-
         #region Constructor
         /// <summary>Constructor</summary>
-        /// <param name="client">Music Client</param>
-        public ListRecommendationViewModel(
-            ISpotifySdkClient client)
-        {
+        /// <param name="client">Spotify SDK Client</param>
+        public ListRecommendationViewModel(ISpotifySdkClient client) => 
             _client = client;
-            Init();
-        }
         #endregion Constructor
 
         #region Public Methods
+        /// <summary>
+        /// Set
+        /// </summary>
+        /// <returns>ListRecommendation ViewModel</returns>
+        public async Task<ListRecommendationViewModel> Set()
+        {
+            var response = await _client.ListRecommendationGenresAsync();
+            response.ForEach(f => Add(f));
+            return this;
+        }
+
         /// <summary>Dispose</summary>
         public void Dispose() => 
             _client = null;
