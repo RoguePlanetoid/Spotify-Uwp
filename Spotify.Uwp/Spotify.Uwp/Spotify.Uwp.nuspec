@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Spotify.Uwp</id>
-    <version>0.4.6</version>
+    <version>0.5.0</version>
     <authors>RoguePlanetoid</authors>
     <owners>RoguePlanetoid</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
