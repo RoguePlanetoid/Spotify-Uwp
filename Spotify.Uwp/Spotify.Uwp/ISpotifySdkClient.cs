@@ -1,6 +1,7 @@
 ﻿using Spotify.NetStandard.Client.Interfaces;
 using Spotify.Uwp.ViewModels;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Spotify.Uwp
@@ -41,6 +42,25 @@ namespace Spotify.Uwp
         /// </summary>
         ListFavouriteViewModel Favourites { get; set; }
         #endregion Public Properties
+
+        #region Public Methods
+        /// <summary>
+        /// Set
+        /// </summary>
+        /// <param name="cultureInfo">Culture Info</param>
+        /// <returns>ISpotifySdkClient</returns>
+        ISpotifySdkClient Set(CultureInfo cultureInfo);
+
+        /// <summary>
+        /// Set
+        /// </summary>
+        /// <param name="country">ISO 3166-1 alpha-2 country code e.g. GB</param>
+        /// <param name="locale">ISO 639-1 language code and an ISO 3166-1 alpha-2 country code, joined by an underscore e.g. en_GB</param>
+        /// <returns></returns>
+        ISpotifySdkClient Set(
+            string country = null,
+            string locale = null);
+        #endregion Public Methods
 
         #region Get Methods
         /// <summary>

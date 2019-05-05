@@ -26,8 +26,18 @@ namespace Spotify.Uwp.Internal
         /// <param name="cultureInfo">Culture Info</param>
         public SpotifySdkClient(
             string clientId,
-            string clientSecret,
-            CultureInfo cultureInfo = null)
+            string clientSecret) => 
+            SpotifyClient = SpotifyClientFactory.CreateSpotifyClient(
+                clientId, clientSecret);
+        #endregion Constructor
+
+        #region Public Methods
+        /// <summary>
+        /// Set
+        /// </summary>
+        /// <param name="cultureInfo">Culture Info</param>
+        /// <returns>ISpotifySdkClient</returns>
+        public ISpotifySdkClient Set(CultureInfo cultureInfo)
         {
             if (cultureInfo != null)
             {
@@ -37,29 +47,24 @@ namespace Spotify.Uwp.Internal
                 if (Locale == null)
                     Locale = $"{cultureInfo.TwoLetterISOLanguageName.ToLower()}_{region.TwoLetterISORegionName.ToUpper()}";
             }
-            SpotifyClient = SpotifyClientFactory.CreateSpotifyClient(
-                clientId, clientSecret);
+            return this;
         }
 
         /// <summary>
-        /// Spotify SDK Client
+        /// Set
         /// </summary>
-        /// <param name="clientId">Spotify Client Id</param>
-        /// <param name="clientSecret">Spotify Client Secret</param>
         /// <param name="country">ISO 3166-1 alpha-2 country code e.g. GB</param>
         /// <param name="locale">ISO 639-1 language code and an ISO 3166-1 alpha-2 country code, joined by an underscore e.g. en_GB</param>
-        public SpotifySdkClient(
-            string clientId,
-            string clientSecret,
+        /// <returns></returns>
+        public ISpotifySdkClient Set(
             string country = null,
             string locale = null)
         {
             Country = country;
             Locale = locale;
-            SpotifyClient = SpotifyClientFactory.CreateSpotifyClient(
-                clientId, clientSecret);
+            return this;
         }
-        #endregion Constructor
+        #endregion Public Methods
 
         #region Public Properties
         /// <summary>

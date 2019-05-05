@@ -25,7 +25,7 @@ namespace Spotify.Uwp.Test
             IConfiguration config = configBuilder.Build();
             // Spotify Client Factory
             _client = SpotifySdkClientFactory.CreateSpotifySdkClient(
-                config["client_id"], config["client_secret"], null);
+                config["client_id"], config["client_secret"]).Set("GB");
             Assert.IsNotNull(_client);
         }
 
@@ -33,8 +33,8 @@ namespace Spotify.Uwp.Test
         [TestMethod]
         public async Task Test_Get_Category()
         {
-            CategoryViewModel item = await _client.GetCategoryAsync("decades");
-            Assert.IsTrue(item?.Id == "decades");
+            CategoryViewModel item = await _client.GetCategoryAsync("pop");
+            Assert.IsTrue(item?.Id == "pop");
         }
 
         [TestMethod]
@@ -131,7 +131,7 @@ namespace Spotify.Uwp.Test
         public async Task Test_ListPlaylists_CategoriesPlaylists()
         {
             NavigationViewModel<PlaylistViewModel> items = await _client.ListPlaylistsAsync(
-                PlaylistType.CategoriesPlaylists, "decades");
+                PlaylistType.CategoriesPlaylists, "pop");
             Assert.IsNotNull(items?.Items);
             Assert.IsTrue(items?.Items.Count > 0);
         }
