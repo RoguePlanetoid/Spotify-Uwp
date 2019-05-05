@@ -115,7 +115,7 @@ namespace Spotify.Uwp.Internal
                     country: Country,
                     locale: Locale);
                 result = Mapping.MapCategory(response);
-                Token = Mapping.MapToken(SpotifyClient.GetToken());
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -138,6 +138,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.LookupAsync<Artist>(
                 id, LookupType.Artists);
                 result = Mapping.MapArtist(response);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -160,6 +161,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.LookupAsync<Album>(
                 id, LookupType.Albums);
                 result = Mapping.MapAlbum(response);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -182,6 +184,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.LookupAsync<Playlist>(
                 id, LookupType.Playlist);
                 result = Mapping.MapPlaylist(response);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -204,6 +207,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.LookupAsync<Track>(
                 id, LookupType.Tracks);
                 result = Mapping.MapTrack(response);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -226,6 +230,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.LookupAsync<AudioAnalysis>(
                 id, LookupType.AudioAnalysis);
                 result = Mapping.MapAudioAnalysis(response);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -243,19 +248,20 @@ namespace Spotify.Uwp.Internal
         public async Task<NavigationViewModel<CategoryViewModel>>
             ListCategoriesAsync()
         {
-            NavigationViewModel<CategoryViewModel> results = null;
+            NavigationViewModel<CategoryViewModel> result = null;
             try
             {
                 var page = (Limit != null) ? new Page() { Limit = Limit.Value } : null;
                 var response = await SpotifyClient.LookupAllCategoriesAsync(
                     country: Country, locale: Locale, page: page);
-                results = Mapping.MapPagingCategory(response?.Categories);
+                result = Mapping.MapPagingCategory(response?.Categories);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
                 throw new TokenRequiredException(TokenType.Access);
             }
-            return results;
+            return result;
         }
 
         /// <summary>
@@ -273,6 +279,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingCategory(response?.Categories);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -302,18 +309,21 @@ namespace Spotify.Uwp.Internal
                         var favourite = await SpotifyClient.LookupAsync(
                             Favourites?.ArtistIds, LookupType.Artists);
                         result = Mapping.MapArtistList(favourite?.Artists);
+                        result = Mapping.MapError(favourite, result);
                         break;
                     case ArtistType.Search:
                         var search = new SearchType() { Artist = true };
-                        var response = await SpotifyClient.SearchAsync(
+                        var searchArtist = await SpotifyClient.SearchAsync(
                         query: id, searchType: search,
                         country: Country, page: page);
-                        result = Mapping.MapPagingArtist(response?.Artists);
+                        result = Mapping.MapPagingArtist(searchArtist?.Artists);
+                        result = Mapping.MapError(searchArtist, result);
                         break;
                     case ArtistType.Related:
                         var related = await SpotifyClient.LookupArtistRelatedArtistsAsync(
                             itemId: id);
                         result = Mapping.MapArtistList(related?.Artists);
+                        result = Mapping.MapError(related, result);
                         break;
                 }
             }
@@ -339,6 +349,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingArtist(response?.Artists);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -368,27 +379,30 @@ namespace Spotify.Uwp.Internal
                         var favourite = await SpotifyClient.LookupAsync(
                             Favourites?.AlbumIds, LookupType.Albums);
                         result = Mapping.MapAlbumList(favourite?.Albums);
+                        result = Mapping.MapError(favourite, result);
                         break;
                     case AlbumType.Search:
                         var search = new SearchType() { Album = true };
-                        var response = await SpotifyClient.SearchAsync(
+                        var searchAlbum = await SpotifyClient.SearchAsync(
                         query: id, searchType: search,
                         country: Country, page: page);
-                        result = Mapping.MapPagingAlbum(response?.Albums);
+                        result = Mapping.MapPagingAlbum(searchAlbum?.Albums);
+                        result = Mapping.MapError(searchAlbum, result);
                         break;
                     case AlbumType.NewReleases:
                         var releases = await SpotifyClient.LookupNewReleasesAsync(
                         country: Country, page: page);
                         result = Mapping.MapPagingAlbum(releases?.Albums);
+                        result = Mapping.MapError(releases, result);
                         break;
                     case AlbumType.Artist:
                         var albums = await SpotifyClient.LookupAsync<Paging<Album>>(
                         id, lookupType: LookupType.ArtistAlbums,
                         market: Country, page: page);
                         result = Mapping.MapPagingAlbum(albums);
+                        result = Mapping.MapError(albums, result);
                         break;
                 }
-                Token = Mapping.MapToken(SpotifyClient.GetToken());
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -412,6 +426,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingAlbum(response?.Albums);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -455,6 +470,7 @@ namespace Spotify.Uwp.Internal
                         break;
                 }
                 result = Mapping.MapPagingPlaylist(response?.Playlists);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -478,6 +494,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingPlaylist(response?.Playlists);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -526,35 +543,41 @@ namespace Spotify.Uwp.Internal
                         var favourite = await SpotifyClient.LookupAsync(
                             Favourites?.TrackIds, LookupType.Tracks);
                         result = Mapping.MapTrackList(favourite?.Tracks);
+                        result = Mapping.MapError(favourite, result);
                         break;
                     case TrackType.Search:
                         var searchType = new SearchType() { Track = true };
                         var searchTracks = await SpotifyClient.SearchAsync(
                             query: id, searchType: searchType, Country, page: page);
                         result = Mapping.MapPagingTrack(searchTracks?.Tracks);
+                        result = Mapping.MapError(searchTracks, result);
                         break;
                     case TrackType.Recommended:
                         var recommendedTracks = await SpotifyClient.LookupRecommendationsAsync(
                             seedGenres: new List<string> { id },
                             market: Country);
                         result = Mapping.MapTrackList(recommendedTracks?.Tracks);
+                        result = Mapping.MapError(recommendedTracks, result);
                         break;
                     case TrackType.Playlist:
                         var playlistTracks = await SpotifyClient.LookupAsync<Paging<PlaylistTrack>>(
                             itemId: id, lookupType: LookupType.PlaylistTracks,
                             market: Country, page: page);
                         result = Mapping.MapPagingTrack(playlistTracks);
+                        result = Mapping.MapError(playlistTracks, result);
                         break;
                     case TrackType.Album:
                         var albumTracks = await SpotifyClient.LookupAsync<Paging<Track>>(
                         itemId: id, lookupType: LookupType.AlbumTracks,
                         market: Country, page: page);
                         result = Mapping.MapPagingTrack(albumTracks);
+                        result = Mapping.MapError(albumTracks, result);
                         break;
                     case TrackType.Artist:
                         var artistTracks = await SpotifyClient.LookupArtistTopTracksAsync(
                             itemId: id, market: Country);
                         result = Mapping.MapTrackList(artistTracks?.Tracks);
+                        result = Mapping.MapError(artistTracks, result);
                         break;
                 }
             }
@@ -580,6 +603,7 @@ namespace Spotify.Uwp.Internal
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingTrack(response?.Tracks);
+                result = Mapping.MapError(response, result);
             }
             catch (AuthAccessTokenRequiredException)
             {

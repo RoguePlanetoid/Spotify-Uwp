@@ -1,6 +1,7 @@
 ﻿using Spotify.NetStandard.Client.Authentication;
 using Spotify.NetStandard.Responses;
 using Spotify.Uwp.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,6 +13,34 @@ namespace Spotify.Uwp.Internal
     internal static class Mapping
     {
         #region Public Methods
+        public static TViewModel MapError<TResponse, TViewModel>(
+            TResponse source, TViewModel target) 
+            where TResponse : BaseResponse 
+            where TViewModel : ErrorViewModel
+        {
+            if (target == null) target = (TViewModel)Activator.CreateInstance(typeof(TViewModel));
+            if (source != null)
+            {
+                target.Message = source?.Error?.Message;
+                target.StatusCode = source?.Error?.StatusCode ?? 0;
+            }
+            return target;
+        }
+
+        public static TViewModel MapError<TResponse, TViewModel>(
+        Paging<TResponse> source, TViewModel target)
+        where TResponse : BaseResponse
+        where TViewModel : ErrorViewModel
+        {
+            if (target == null) target = (TViewModel)Activator.CreateInstance(typeof(TViewModel));
+            if (source != null)
+            {
+                target.Message = source?.Error?.Message;
+                target.StatusCode = source?.Error?.StatusCode ?? 0;
+            }
+            return target;
+        }
+
         public static TokenViewModel MapToken(AccessToken source)
         {
             if (source == null) return null;
@@ -231,7 +260,7 @@ namespace Spotify.Uwp.Internal
                 Offset = source.Offset,
                 Back = source.Previous,
                 Total = source.Total,
-                Items = source.Items.ConvertAll(MapArtist),
+                Items = source.Items.ConvertAll(MapArtist)
             };
             return result;
         }
@@ -246,7 +275,7 @@ namespace Spotify.Uwp.Internal
                 Offset = source.Offset,
                 Back = source.Previous,
                 Total = source.Total,
-                Items = source.Items.ConvertAll(MapAlbum),
+                Items = source.Items.ConvertAll(MapAlbum)
             };
             return result;
         }
@@ -262,6 +291,8 @@ namespace Spotify.Uwp.Internal
                 Back = source.Previous,
                 Total = source.Total,
                 Items = source.Items.ConvertAll(MapPlaylist),
+                StatusCode = source?.Error?.StatusCode ?? 0,
+                Message = source?.Error?.Message
             };
             return result;
         }
@@ -454,7 +485,9 @@ namespace Spotify.Uwp.Internal
                 Back = source.Previous,
                 Limit = source.Limit,
                 Offset = source.Offset,
-                Items = source.Items.ConvertAll(MapTrack)
+                Items = source.Items.ConvertAll(MapTrack),
+                StatusCode = source?.Error?.StatusCode ?? 0,
+                Message = source?.Error?.Message
             };
             return result;
         }
@@ -469,7 +502,9 @@ namespace Spotify.Uwp.Internal
                 Back = source.Previous,
                 Limit = source.Limit,
                 Offset = source.Offset,
-                Items = source.Items.ConvertAll(MapAlbum)
+                Items = source.Items.ConvertAll(MapAlbum),
+                StatusCode = source?.Error?.StatusCode ?? 0,
+                Message = source?.Error?.Message
             };
             return result;
         }
@@ -483,7 +518,12 @@ namespace Spotify.Uwp.Internal
                 Next = source.Next,
                 Previous = source.Back,
                 Limit = source.Limit,
-                Offset = source.Offset
+                Offset = source.Offset,
+                Error = new ErrorResponse()
+                {
+                    Message = source.Message,
+                    StatusCode = source.StatusCode
+                }
             };
             return result;
         }
@@ -493,8 +533,8 @@ namespace Spotify.Uwp.Internal
             if (source == null) return null;
             var result = new NavigationViewModel<TrackViewModel>()
             {
-                Total = source.Count,
-                Items = source.ConvertAll(MapTrack)
+                Total = source?.Count ?? 0,
+                Items = source?.ConvertAll(MapTrack)
             };
             return result;
         }
@@ -504,8 +544,8 @@ namespace Spotify.Uwp.Internal
             if (source == null) return null;
             var result = new NavigationViewModel<TrackViewModel>()
             {
-                Total = source.Count,
-                Items = source.ConvertAll(MapTrack)
+                Total = source?.Count ?? 0,
+                Items = source?.ConvertAll(MapTrack)
             };
             return result;
         }
@@ -515,8 +555,8 @@ namespace Spotify.Uwp.Internal
             if (source == null) return null;
             var result = new NavigationViewModel<ArtistViewModel>()
             {
-                Total = source.Count,
-                Items = source.ConvertAll(MapArtist)
+                Total = source?.Count ?? 0,
+                Items = source?.ConvertAll(MapArtist)
             };
             return result;
         }
@@ -526,8 +566,8 @@ namespace Spotify.Uwp.Internal
             if (source == null) return null;
             var result = new NavigationViewModel<AlbumViewModel>()
             {
-                Total = source.Count,
-                Items = source.ConvertAll(MapAlbum)
+                Total = source?.Count ?? 0,
+                Items = source?.ConvertAll(MapAlbum)
             };
             return result;
         }
@@ -592,7 +632,9 @@ namespace Spotify.Uwp.Internal
                 Uri = source.Uri,
                 Type = source.Type,                
                 Name = name,
-                Value = (int)((value ?? 0) * 100)
+                Value = (int)((value ?? 0) * 100),
+                Message = source?.Error?.Message,
+                StatusCode = source?.Error?.StatusCode ?? 0
             };
             if (source == null) return null;
             var results = new List<AudioFeatureViewModel>()

@@ -5,7 +5,7 @@ namespace Spotify.Uwp.ViewModels
     /// <summary>
     /// Base View Model
     /// </summary>
-    public abstract class BaseViewModel
+    public abstract class BaseViewModel : ErrorViewModel
     {
         /// <summary>
         /// The object type of the object

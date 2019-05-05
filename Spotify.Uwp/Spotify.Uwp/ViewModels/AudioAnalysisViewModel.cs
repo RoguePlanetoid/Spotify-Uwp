@@ -5,7 +5,7 @@ namespace Spotify.Uwp.ViewModels
     /// <summary>
     /// Audio Analysis ViewModel
     /// </summary>
-    public class AudioAnalysisViewModel
+    public class AudioAnalysisViewModel : ErrorViewModel
     {
         /// <summary>
         /// The time intervals of the bars throughout the track

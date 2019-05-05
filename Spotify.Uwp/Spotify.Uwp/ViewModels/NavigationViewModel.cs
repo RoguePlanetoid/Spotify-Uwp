@@ -6,7 +6,7 @@ namespace Spotify.Uwp.ViewModels
     /// Navigation View Model
     /// </summary>
     /// <typeparam name="TViewModel">View Model Type</typeparam>
-    public class NavigationViewModel<TViewModel>
+    public class NavigationViewModel<TViewModel> : ErrorViewModel
     {
         /// <summary>
         /// Offset

@@ -329,3 +329,4 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 /Spotify.Uwp/Spotify.Uwp.Test/appsettings.json
+/Spotify.Uwp/Spotify.Uwp/nuget.exe
