@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 namespace Spotify.Uwp.ViewModels
 {
@@ -12,27 +11,32 @@ namespace Spotify.Uwp.ViewModels
         private ISpotifySdkClient _client = null;
         #endregion Private Members
 
-        #region Constructor
-        /// <summary>Constructor</summary>
-        /// <param name="client">Spotify SDK Client</param>
-        public ListAudioFeatureViewModel(ISpotifySdkClient client) => 
-            _client = client;
-        #endregion Constructor
-
-        #region Public Methods
+        #region Private Methods
         /// <summary>
-        /// Set
+        /// Init
         /// </summary>
-        /// <param name="id">Value</param>
-        /// <returns>ListAudioFeature ViewModel</returns>
-        public async Task<ListAudioFeatureViewModel> Set(
+        private async void Init(
             string id)
         {
             var response = await _client.ListAudioFeatureAsync(id);
             response.ForEach(f => Add(f));
-            return this;
         }
+        #endregion Private Methods
 
+        #region Constructor
+        /// <summary>Constructor</summary>
+        /// <param name="client">Music Client</param>
+        /// <param name="id">Id</param>
+        public ListAudioFeatureViewModel(
+            ISpotifySdkClient client,
+            string id)
+        {
+            _client = client;
+            Init(id);
+        }
+        #endregion Constructor
+
+        #region Public Methods
         /// <summary>Dispose</summary>
         public void Dispose() =>
             _client = null;

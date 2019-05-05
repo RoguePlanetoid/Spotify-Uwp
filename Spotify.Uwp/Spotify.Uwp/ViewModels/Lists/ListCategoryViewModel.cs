@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml.Data;
 
@@ -20,19 +19,11 @@ namespace Spotify.Uwp.ViewModels
         private int _count = 0;
         #endregion Private Members
 
-        #region Constructor
-        /// <summary>Constructor</summary>
-        /// <param name="client">Spotify SDK Client</param>
-        public ListCategoryViewModel(ISpotifySdkClient client) => 
-            _client = client;
-        #endregion Constructor
-
-        #region Public Methods
+        #region Private Methods
         /// <summary>
-        /// Set
+        /// Init
         /// </summary>
-        /// <returns>ListCategory ViewModel</returns>
-        public async Task<ListCategoryViewModel> Set()
+        private async void Init()
         {
             _results = await _client.ListCategoriesAsync();
             _count = _results?.Items?.Count ?? 0;
@@ -40,9 +31,21 @@ namespace Spotify.Uwp.ViewModels
             {
                 _results.Items.ForEach(f => Add(f));
             }
-            return this;
         }
+        #endregion Private Methods
 
+        #region Constructor
+        /// <summary>Constructor</summary>
+        /// <param name="client">Music Client</param>
+        public ListCategoryViewModel(
+            ISpotifySdkClient client)
+        {
+            _client = client;
+            Init();
+        }
+        #endregion Constructor
+
+        #region Public Methods
         /// <summary>
         /// Has More Items
         /// </summary>
@@ -70,7 +73,7 @@ namespace Spotify.Uwp.ViewModels
         }
 
         /// <summary>Dispose</summary>
-        public void Dispose() => 
+        public void Dispose() =>
             _client = null;
         #endregion Public Methods
     }
