@@ -1,4 +1,5 @@
 ﻿using Spotify.NetStandard.Client.Authentication;
+using Spotify.NetStandard.Requests;
 using Spotify.NetStandard.Responses;
 using Spotify.Uwp.ViewModels;
 using System;
@@ -65,6 +66,62 @@ namespace Spotify.Uwp.Internal
                 Scopes = source.Scopes,
                 Token = source.Token,
                 TokenType = (NetStandard.Client.Authentication.Enums.TokenType)source.TokenType
+            };
+            return result;
+        }
+
+        public static ScopeViewModel MapScope(Scope source)
+        {
+            if (source == null) return null;
+            var result = new ScopeViewModel()
+            {
+                ConnectModifyPlaybackState = source.ConnectModifyPlaybackState,
+                ConnectReadCurrentlyPlaying = source.ConnectReadCurrentlyPlaying,
+                ConnectReadPlaybackState = source.ConnectReadPlaybackState,
+                FollowModify = source.FollowModify,
+                FollowRead = source.FollowRead,
+                LibraryModify = source.LibraryModify,
+                LibraryRead = source.LibraryRead,
+                ListeningRecentlyPlayed = source.ListeningRecentlyPlayed,
+                ListeningTopRead = source.ListeningTopRead,
+                PlaybackAppRemoteControl = source.PlaybackAppRemoteControl,
+                PlaybackStreaming = source.PlaybackStreaming,
+                PlaylistModifyPrivate = source.PlaylistModifyPrivate,
+                PlaylistModifyPublic = source.PlaylistModifyPublic,
+                PlaylistReadCollaborative = source.PlaylistReadCollaborative,
+                PlaylistReadPrivate = source.PlaylistReadPrivate,
+                UserGeneratedContentImageUpload = source.UserGeneratedContentImageUpload,
+                UserReadBirthDate = source.UserReadBirthDate,
+                UserReadPrivate = source.UserReadPrivate,
+                UserReadEmail = source.UserReadEmail
+            };
+            return result;
+        }
+
+        public static Scope MapScope(ScopeViewModel source)
+        {
+            if (source == null) return null;
+            var result = new Scope()
+            {
+                ConnectModifyPlaybackState = source.ConnectModifyPlaybackState,
+                ConnectReadCurrentlyPlaying = source.ConnectReadCurrentlyPlaying,
+                ConnectReadPlaybackState = source.ConnectReadPlaybackState,
+                FollowModify = source.FollowModify,
+                FollowRead = source.FollowRead,
+                LibraryModify = source.LibraryModify,
+                LibraryRead = source.LibraryRead,
+                ListeningRecentlyPlayed = source.ListeningRecentlyPlayed,
+                ListeningTopRead = source.ListeningTopRead,
+                PlaybackAppRemoteControl = source.PlaybackAppRemoteControl,
+                PlaybackStreaming = source.PlaybackStreaming,
+                PlaylistModifyPrivate = source.PlaylistModifyPrivate,
+                PlaylistModifyPublic = source.PlaylistModifyPublic,
+                PlaylistReadCollaborative = source.PlaylistReadCollaborative,
+                PlaylistReadPrivate = source.PlaylistReadPrivate,
+                UserGeneratedContentImageUpload = source.UserGeneratedContentImageUpload,
+                UserReadBirthDate = source.UserReadBirthDate,
+                UserReadPrivate = source.UserReadPrivate,
+                UserReadEmail = source.UserReadEmail
             };
             return result;
         }

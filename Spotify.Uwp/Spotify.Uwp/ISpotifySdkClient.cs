@@ -1,5 +1,6 @@
 ﻿using Spotify.NetStandard.Client.Interfaces;
 using Spotify.Uwp.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -61,6 +62,70 @@ namespace Spotify.Uwp
             string country = null,
             string locale = null);
         #endregion Public Methods
+
+        #region Authentication Methods
+        /// <summary>
+        /// Get Authorisation Code Flow Uri
+        /// </summary>
+        /// <param name="redirectUri">Redirect Uri</param>
+        /// <param name="state">State for Request / Response Validation</param>
+        /// <param name="scope">Authorisation Scopes</param>
+        /// <param name="showDialog">(Optional) Whether or not to force the user to approve the app again if they’ve already done so.</param>
+        /// <returns>Uri</returns>
+        Uri GetAuthorisationCodeFlowUri(
+            Uri redirectUri,
+            string state,
+            ScopeViewModel scope,
+            bool showDialog = false);
+
+        /// <summary>
+        /// Get Authorisation Code Flow Token
+        /// </summary>
+        /// <param name="responseUri">Response Uri</param>
+        /// <param name="redirectUri">Redirect Uri</param>
+        /// <param name="state">State for Request Validation</param>
+        /// <returns>AccessToken on Success, Null if Not</returns>
+        /// <exception cref="AuthCodeValueException">AuthCodeValueException</exception>
+        /// <exception cref="AuthCodeStateException">AuthCodeStateException</exception>
+        Task<TokenViewModel> GetAuthorisationCodeFlowTokenAsync(
+            Uri responseUri,
+            Uri redirectUri,
+            string state);
+
+        /// <summary>
+        /// Get Client Credentials Flow Token
+        /// </summary>
+        /// <returns>AccessToken on Success, Null if Not</returns>
+        Task<TokenViewModel> GetClientCredentialsFlowTokenAsync();
+
+        /// <summary>
+        /// Get Implicit Grant Flow Uri
+        /// </summary>
+        /// <param name="redirectUri">Redirect Uri</param>
+        /// <param name="state">State for Request / Response Validation</param>
+        /// <param name="scope">Authorisation Scopes</param>
+        /// <param name="showDialog">(Optional) Whether or not to force the user to approve the app again if they’ve already done so.</param>
+        /// <returns>Uri</returns>
+        Uri GetImplicitGrantFlowUri(
+            Uri redirectUri,
+            string state,
+            ScopeViewModel scope,
+            bool showDialog = false);
+
+        /// <summary>
+        /// Get Implicit Grant Flow Token
+        /// </summary>
+        /// <param name="responseUri">Response Uri</param>
+        /// <param name="redirectUri">Redirect Uri</param>
+        /// <param name="state">State for Request / Response Validation</param>
+        /// <returns>AccessToken on Success, Null if Not</returns>
+        /// <exception cref="AuthTokenValueException">AuthCodeValueException</exception>
+        /// <exception cref="AuthTokenStateException">AuthCodeStateException</exception>
+        TokenViewModel GetImplicitGrantFlowToken(
+            Uri responseUri,
+            Uri redirectUri,
+            string state);
+        #endregion Authentication Methods
 
         #region Get Methods
         /// <summary>

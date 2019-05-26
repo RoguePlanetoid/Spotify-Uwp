@@ -6,6 +6,7 @@ using Spotify.NetStandard.Requests;
 using Spotify.NetStandard.Responses;
 using Spotify.Uwp.Exceptions;
 using Spotify.Uwp.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -101,6 +102,76 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         public ListFavouriteViewModel Favourites { get; set; } = new ListFavouriteViewModel();
         #endregion Public Properties
+
+        #region Authentication Methods
+        /// <summary>
+        /// Get Authorisation Code Flow Uri
+        /// </summary>
+        /// <param name="redirectUri">Redirect Uri</param>
+        /// <param name="state">State for Request / Response Validation</param>
+        /// <param name="scope">Authorisation Scopes</param>
+        /// <param name="showDialog">(Optional) Whether or not to force the user to approve the app again if they’ve already done so.</param>
+        /// <returns>Uri</returns>
+        public Uri GetAuthorisationCodeFlowUri(
+            Uri redirectUri,
+            string state,
+            ScopeViewModel scope,
+            bool showDialog = false) =>
+            SpotifyClient.AuthUser(redirectUri, state, Mapping.MapScope(scope), showDialog);
+
+        /// <summary>
+        /// Get Authorisation Code Flow Token
+        /// </summary>
+        /// <param name="responseUri">Response Uri</param>
+        /// <param name="redirectUri">Redirect Uri</param>
+        /// <param name="state">State for Request Validation</param>
+        /// <returns>AccessToken on Success, Null if Not</returns>
+        /// <exception cref="AuthCodeValueException">AuthCodeValueException</exception>
+        /// <exception cref="AuthCodeStateException">AuthCodeStateException</exception>
+        public async Task<TokenViewModel> GetAuthorisationCodeFlowTokenAsync(
+            Uri responseUri,
+            Uri redirectUri,
+            string state) =>
+                Mapping.MapToken(await SpotifyClient.AuthUserAsync(
+                responseUri, redirectUri, state));
+
+        /// <summary>
+        /// Get Client Credentials Flow Token
+        /// </summary>
+        /// <returns>AccessToken on Success, Null if Not</returns>
+        public async Task<TokenViewModel> GetClientCredentialsFlowTokenAsync() =>
+            Mapping.MapToken(await SpotifyClient.AuthAsync());
+
+        /// <summary>
+        /// Get Implicit Grant Flow Uri
+        /// </summary>
+        /// <param name="redirectUri">Redirect Uri</param>
+        /// <param name="state">State for Request / Response Validation</param>
+        /// <param name="scope">Authorisation Scopes</param>
+        /// <param name="showDialog">(Optional) Whether or not to force the user to approve the app again if they’ve already done so.</param>
+        /// <returns>Uri</returns>
+        public Uri GetImplicitGrantFlowUri(
+            Uri redirectUri,
+            string state,
+            ScopeViewModel scope,
+            bool showDialog = false) =>
+            SpotifyClient.AuthUserImplicit(redirectUri, state, Mapping.MapScope(scope), showDialog);
+
+        /// <summary>
+        /// Get Implicit Grant Flow Token
+        /// </summary>
+        /// <param name="responseUri">Response Uri</param>
+        /// <param name="redirectUri">Redirect Uri</param>
+        /// <param name="state">State for Request / Response Validation</param>
+        /// <returns>AccessToken on Success, Null if Not</returns>
+        /// <exception cref="AuthTokenValueException">AuthCodeValueException</exception>
+        /// <exception cref="AuthTokenStateException">AuthCodeStateException</exception>
+        public TokenViewModel GetImplicitGrantFlowToken(
+            Uri responseUri,
+            Uri redirectUri,
+            string state) =>
+            Mapping.MapToken(SpotifyClient.AuthUserImplicit(responseUri, redirectUri, state));
+        #endregion Authentication Methods
 
         #region Get Methods
         /// <summary>

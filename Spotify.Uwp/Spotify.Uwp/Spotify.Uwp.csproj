@@ -152,6 +152,7 @@
     <Compile Include="ViewModels\PlaylistViewModel.cs" />
     <Compile Include="ViewModels\PublicUserViewModel.cs" />
     <Compile Include="ViewModels\RecommendationGenreViewModel.cs" />
+    <Compile Include="ViewModels\ScopeViewModel.cs" />
     <Compile Include="ViewModels\SectionViewModel.cs" />
     <Compile Include="ViewModels\SegmentViewModel.cs" />
     <Compile Include="ViewModels\TimeIntervalViewModel.cs" />
@@ -167,7 +168,7 @@
       <Version>6.2.8</Version>
     </PackageReference>
     <PackageReference Include="Spotify.NetStandard">
-      <Version>1.0.0</Version>
+      <Version>1.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
