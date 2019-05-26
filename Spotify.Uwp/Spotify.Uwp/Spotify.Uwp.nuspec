@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Spotify.Uwp</id>
-    <version>0.7.1</version>
+    <version>0.7.3</version>
     <authors>RoguePlanetoid</authors>
     <owners>RoguePlanetoid</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -12,7 +12,7 @@
     <repository url="https://github.com/RoguePlanetoid/Spotify-Uwp" />
 	<dependencies>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="Spotify.NetStandard" version="1.0.2" exclude="Build,Analyzers" />
+        <dependency id="Spotify.NetStandard" version="1.1.0" exclude="Build,Analyzers" />
       </group>
     </dependencies>
   </metadata>
