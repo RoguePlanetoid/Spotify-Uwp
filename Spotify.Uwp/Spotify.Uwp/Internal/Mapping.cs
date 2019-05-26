@@ -42,6 +42,20 @@ namespace Spotify.Uwp.Internal
             return target;
         }
 
+        public static TViewModel MapError<TResponse, TViewModel>(
+        CursorPaging<TResponse> source, TViewModel target)
+        where TResponse : BaseResponse
+        where TViewModel : ErrorViewModel
+        {
+            if (target == null) target = (TViewModel)Activator.CreateInstance(typeof(TViewModel));
+            if (source != null)
+            {
+                target.Message = source?.Error?.Message;
+                target.StatusCode = source?.Error?.StatusCode ?? 0;
+            }
+            return target;
+        }
+
         public static TokenViewModel MapToken(AccessToken source)
         {
             if (source == null) return null;
@@ -284,6 +298,12 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
+        public static AlbumViewModel MapAlbum(SavedAlbum source)
+        {
+            if (source == null) return null;
+            return MapAlbum(source.Album);
+        }
+
         public static PlaylistViewModel MapPlaylist(Playlist source)
         {
             if (source == null) return null;
@@ -300,7 +320,7 @@ namespace Spotify.Uwp.Internal
                 Owner = MapPublicUser(source.Owner),
                 Public = source.Public,
                 SnapshotId = source.SnapshotId,
-                Tracks = MapPagingTrack(source.Tracks),
+                Tracks = MapPagingTrack(source.Tracks, TrackType.Playlist),
                 Type = source.Type,
                 Uri = source.Uri
             };
@@ -331,6 +351,20 @@ namespace Spotify.Uwp.Internal
                 Next = source.Next,
                 Offset = source.Offset,
                 Back = source.Previous,
+                Total = source.Total,
+                Items = source.Items.ConvertAll(MapAlbum)
+            };
+            return result;
+        }
+
+        public static NavigationViewModel<AlbumViewModel> MapCursorAlbum(CursorPaging<SavedAlbum> source)
+        {
+            if (source == null) return null;
+            var result = new NavigationViewModel<AlbumViewModel>()
+            {
+                Limit = source.Limit ?? 0,
+                Next = source.Next,
+                Back = source.Before,
                 Total = source.Total,
                 Items = source.Items.ConvertAll(MapAlbum)
             };
@@ -406,6 +440,12 @@ namespace Spotify.Uwp.Internal
         }
 
         public static TrackViewModel MapTrack(PlaylistTrack source)
+        {
+            if (source == null) return null;
+            return MapTrack(source.Track);
+        }
+
+        public static TrackViewModel MapTrack(SavedTrack source)
         {
             if (source == null) return null;
             return MapTrack(source.Track);
@@ -517,11 +557,12 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static NavigationViewModel<TrackViewModel> MapPagingTrack(Paging<Track> source)
+        public static NavigationViewModel<TrackViewModel> MapPagingTrack(Paging<Track> source, TrackType type)
         {
             if (source == null) return null;
             var result = new NavigationViewModel<TrackViewModel>()
             {
+                Type = type,
                 Total = source.Total,
                 Next = source.Next,
                 Back = source.Previous,
@@ -532,11 +573,27 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static NavigationViewModel<TrackViewModel> MapPagingTrack(Paging<PlaylistTrack> source)
+        public static NavigationViewModel<TrackViewModel> MapCursorTrack(CursorPaging<SavedTrack> source, TrackType type)
         {
             if (source == null) return null;
             var result = new NavigationViewModel<TrackViewModel>()
             {
+                Type = type,
+                Limit = source.Limit ?? 0,
+                Next = source.Next,
+                Back = source.Before,
+                Total = source.Total,
+                Items = source.Items.ConvertAll(MapTrack)
+            };
+            return result;
+        }
+
+        public static NavigationViewModel<TrackViewModel> MapPagingTrack(Paging<PlaylistTrack> source, TrackType type)
+        {
+            if (source == null) return null;
+            var result = new NavigationViewModel<TrackViewModel>()
+            {
+                Type = type,
                 Total = source.Total,
                 Next = source.Next,
                 Back = source.Previous,
@@ -549,24 +606,7 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static NavigationViewModel<AlbumViewModel> MapPagingTrack(Paging<Album> source)
-        {
-            if (source == null) return null;
-            var result = new NavigationViewModel<AlbumViewModel>()
-            {
-                Total = source.Total,
-                Next = source.Next,
-                Back = source.Previous,
-                Limit = source.Limit,
-                Offset = source.Offset,
-                Items = source.Items.ConvertAll(MapAlbum),
-                StatusCode = source?.Error?.StatusCode ?? 0,
-                Message = source?.Error?.Message
-            };
-            return result;
-        }
-
-        public static Paging<TModel> MapNavigation<TModel, TViewModel>(NavigationViewModel<TViewModel> source)
+        public static Paging<TModel> MapNavigationPaging<TModel, TViewModel>(NavigationViewModel<TViewModel> source)
         {
             if (source == null) return null;
             var result = new Paging<TModel>()
@@ -585,22 +625,43 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static NavigationViewModel<TrackViewModel> MapTrackList(List<SimplifiedTrack> source)
+        public static CursorPaging<TModel> MapNavigationCursor<TModel, TViewModel>(NavigationViewModel<TViewModel> source)
+        {
+            if (source == null) return null;
+            var result = new CursorPaging<TModel>()
+            {
+                Total = source.Total,
+                Next = source.Next,
+                Before = source.Back,
+                Limit = source.Limit,
+                
+                Error = new ErrorResponse()
+                {
+                    Message = source.Message,
+                    StatusCode = source.StatusCode
+                }
+            };
+            return result;
+        }
+
+        public static NavigationViewModel<TrackViewModel> MapTrackList(List<SimplifiedTrack> source, TrackType type)
         {
             if (source == null) return null;
             var result = new NavigationViewModel<TrackViewModel>()
             {
+                Type = type,
                 Total = source?.Count ?? 0,
                 Items = source?.ConvertAll(MapTrack)
             };
             return result;
         }
 
-        public static NavigationViewModel<TrackViewModel> MapTrackList(List<Track> source)
+        public static NavigationViewModel<TrackViewModel> MapTrackList(List<Track> source, TrackType type)
         {
             if (source == null) return null;
             var result = new NavigationViewModel<TrackViewModel>()
             {
+                Type = type,
                 Total = source?.Count ?? 0,
                 Items = source?.ConvertAll(MapTrack)
             };

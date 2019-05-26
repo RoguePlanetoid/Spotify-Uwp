@@ -21,7 +21,8 @@
         Recommended,
         Playlist,
         Album,
-        Artist
+        Artist,
+        Saved
     }
 
     public enum AlbumType
@@ -29,7 +30,8 @@
         Favourites,
         Search,
         NewReleases,
-        Artist
+        Artist,
+        Saved
     }
 
     public enum ArtistType
@@ -44,6 +46,13 @@
         Album,
         Artist,
         Track
+    }
+
+    public enum FollowType
+    {
+        Artist,
+        User,
+        Playlist
     }
     #endregion Public Enums
 }

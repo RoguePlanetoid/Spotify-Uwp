@@ -168,7 +168,7 @@
       <Version>6.2.8</Version>
     </PackageReference>
     <PackageReference Include="Spotify.NetStandard">
-      <Version>1.0.2</Version>
+      <Version>1.0.56</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

@@ -9,6 +9,7 @@ using Spotify.Uwp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Spotify.Uwp.Internal
@@ -27,7 +28,7 @@ namespace Spotify.Uwp.Internal
         /// <param name="cultureInfo">Culture Info</param>
         public SpotifySdkClient(
             string clientId,
-            string clientSecret) => 
+            string clientSecret) =>
             SpotifyClient = SpotifyClientFactory.CreateSpotifyClient(
                 clientId, clientSecret);
         #endregion Constructor
@@ -351,7 +352,7 @@ namespace Spotify.Uwp.Internal
             NavigationViewModel<CategoryViewModel> result = null;
             try
             {
-                var paging = Mapping.MapNavigation<Category, CategoryViewModel>(navigation);
+                var paging = Mapping.MapNavigationPaging<Category, CategoryViewModel>(navigation);
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingCategory(response?.Categories);
@@ -421,7 +422,7 @@ namespace Spotify.Uwp.Internal
             NavigationViewModel<ArtistViewModel> result = null;
             try
             {
-                var paging = Mapping.MapNavigation<Artist, ArtistViewModel>(navigation);
+                var paging = Mapping.MapNavigationPaging<Artist, ArtistViewModel>(navigation);
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingArtist(response?.Artists);
@@ -449,6 +450,7 @@ namespace Spotify.Uwp.Internal
             try
             {
                 var page = (Limit != null) ? new Page() { Limit = Limit.Value } : null;
+                var cursor = (Limit != null) ? new Cursor() { Limit = Limit.Value } : null;
                 switch (type)
                 {
                     case AlbumType.Favourites:
@@ -478,11 +480,21 @@ namespace Spotify.Uwp.Internal
                         result = Mapping.MapPagingAlbum(albums);
                         result = Mapping.MapError(albums, result);
                         break;
+                    case AlbumType.Saved:
+                        var saved = await SpotifyClient.AuthLookupUserSavedAlbumsAsync(
+                            market: Country, cursor: cursor);
+                        result = Mapping.MapCursorAlbum(saved);
+                        result = Mapping.MapError(saved, result);
+                        break;
                 }
             }
             catch (AuthAccessTokenRequiredException)
             {
                 throw new TokenRequiredException(TokenType.Access);
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                throw new TokenRequiredException(TokenType.User);
             }
             return result;
         }
@@ -498,7 +510,8 @@ namespace Spotify.Uwp.Internal
             NavigationViewModel<AlbumViewModel> result = null;
             try
             {
-                var paging = Mapping.MapNavigation<Album, AlbumViewModel>(navigation);
+
+                var paging = Mapping.MapNavigationPaging<Album, AlbumViewModel>(navigation);
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingAlbum(response?.Albums);
@@ -566,7 +579,7 @@ namespace Spotify.Uwp.Internal
             NavigationViewModel<PlaylistViewModel> result = null;
             try
             {
-                var paging = Mapping.MapNavigation<Playlist, PlaylistViewModel>(navigation);
+                var paging = Mapping.MapNavigationPaging<Playlist, PlaylistViewModel>(navigation);
                 var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
                 result = Mapping.MapPagingPlaylist(response?.Playlists);
@@ -613,49 +626,60 @@ namespace Spotify.Uwp.Internal
             try
             {
                 var page = (Limit != null) ? new Page() { Limit = Limit.Value } : null;
+                var cursor = (Limit != null) ? new Cursor() { Limit = Limit.Value } : null;
                 switch (type)
                 {
                     case TrackType.Favourites:
                         var favourite = await SpotifyClient.LookupAsync(
                             Favourites?.TrackIds, LookupType.Tracks);
-                        result = Mapping.MapTrackList(favourite?.Tracks);
+                        result = Mapping.MapTrackList(favourite?.Tracks, type);
                         result = Mapping.MapError(favourite, result);
                         break;
                     case TrackType.Search:
                         var searchType = new SearchType() { Track = true };
                         var searchTracks = await SpotifyClient.SearchAsync(
                             query: id, searchType: searchType, Country, page: page);
-                        result = Mapping.MapPagingTrack(searchTracks?.Tracks);
+                        result = Mapping.MapPagingTrack(searchTracks?.Tracks, type);
                         result = Mapping.MapError(searchTracks, result);
                         break;
                     case TrackType.Recommended:
                         var recommendedTracks = await SpotifyClient.LookupRecommendationsAsync(
                             seedGenres: new List<string> { id },
                             market: Country);
-                        result = Mapping.MapTrackList(recommendedTracks?.Tracks);
+                        result = Mapping.MapTrackList(recommendedTracks?.Tracks, type);
                         result = Mapping.MapError(recommendedTracks, result);
                         break;
                     case TrackType.Playlist:
                         var playlistTracks = await SpotifyClient.LookupAsync<Paging<PlaylistTrack>>(
                             itemId: id, lookupType: LookupType.PlaylistTracks,
                             market: Country, page: page);
-                        result = Mapping.MapPagingTrack(playlistTracks);
+                        result = Mapping.MapPagingTrack(playlistTracks, type);
                         result = Mapping.MapError(playlistTracks, result);
                         break;
                     case TrackType.Album:
                         var albumTracks = await SpotifyClient.LookupAsync<Paging<Track>>(
                         itemId: id, lookupType: LookupType.AlbumTracks,
                         market: Country, page: page);
-                        result = Mapping.MapPagingTrack(albumTracks);
+                        result = Mapping.MapPagingTrack(albumTracks, type);
                         result = Mapping.MapError(albumTracks, result);
                         break;
                     case TrackType.Artist:
                         var artistTracks = await SpotifyClient.LookupArtistTopTracksAsync(
                             itemId: id, market: Country);
-                        result = Mapping.MapTrackList(artistTracks?.Tracks);
+                        result = Mapping.MapTrackList(artistTracks?.Tracks, type);
                         result = Mapping.MapError(artistTracks, result);
                         break;
+                    case TrackType.Saved:
+                        var saved = await SpotifyClient.AuthLookupUserSavedTracksAsync(
+                            market: Country, cursor: cursor);
+                        result = Mapping.MapCursorTrack(saved, type);
+                        result = Mapping.MapError(saved, result);
+                        break;
                 }
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                throw new TokenRequiredException(TokenType.User);
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -675,11 +699,23 @@ namespace Spotify.Uwp.Internal
             NavigationViewModel<TrackViewModel> result = null;
             try
             {
-                var paging = Mapping.MapNavigation<Track, TrackViewModel>(navigation);
-                var response = await SpotifyClient.NavigateAsync(
-                    paging, NavigateType.Next);
-                result = Mapping.MapPagingTrack(response?.Tracks);
-                result = Mapping.MapError(response, result);
+                var type = (TrackType)navigation.Type;
+                if (type == TrackType.Saved)
+                {
+                    var cursor = Mapping.MapNavigationCursor<SavedTrack, TrackViewModel>(navigation);
+                    var response = await SpotifyClient.AuthNavigateAsync(
+                        cursor, NavigateType.Next);
+                    result = Mapping.MapCursorTrack(response, type);
+                    result = Mapping.MapError(response, result);
+                }
+                else
+                {
+                    var paging = Mapping.MapNavigationPaging<Track, TrackViewModel>(navigation);
+                    var response = await SpotifyClient.NavigateAsync(
+                        paging, NavigateType.Next);
+                    result = Mapping.MapPagingTrack(response?.Tracks, type);
+                    result = Mapping.MapError(response, result);
+                }
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -732,5 +768,57 @@ namespace Spotify.Uwp.Internal
             return results;
         }
         #endregion List Methods   
+
+        #region Follow Methods
+        /// <summary>
+        /// Is Following Artists or Users and Check if Users Follow a Playlist
+        /// <para>Scopes: FollowRead, PlaylistReadPrivate</para>
+        /// </summary>
+        /// <param name="itemIds">(Required) List of the Artist or the User Spotify IDs to check</param>
+        /// <param name="followType">(Required) Either Artist or User</param>
+        /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
+        /// <returns>List of True or False values</returns>
+        /// <exception cref="TokenRequiredException"></exception>
+        public async Task<List<bool>> IsFollowing(
+            List<string> ids,
+            FollowType type,
+            string playlistId = null)
+        {
+            try
+            {
+                switch (type)
+                {
+                    case FollowType.Artist:
+                        return await SpotifyClient.AuthLookupFollowingStateAsync(
+                            ids, NetStandard.Enums.FollowType.Artist);
+                    case FollowType.User:
+                        return await SpotifyClient.AuthLookupFollowingStateAsync(
+                        ids, NetStandard.Enums.FollowType.User);
+                    case FollowType.Playlist:
+                        if (playlistId == null) throw new ArgumentNullException(nameof(playlistId));
+                        return await SpotifyClient.AuthLookupUserFollowingPlaylistAsync(ids,
+                            playlistId);
+                }
+                return null;
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                throw new TokenRequiredException(TokenType.User);
+            }
+        }
+
+        /// <summary>
+        /// Is Following
+        /// </summary>
+        /// <param name="itemIds">(Required) Artist or the User Spotify IDs to check</param>
+        /// <param name="followType">(Required) Either Artist or User</param>
+        /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
+        /// <returns>True if Is, False if Not</returns>
+        public async Task<bool> IsFollowing(
+            string id,
+            FollowType type, 
+            string playlistId = null) => 
+            (await IsFollowing(new List<string> { id }, type, playlistId)).FirstOrDefault();
+        #endregion Follow Methods
     }
 }

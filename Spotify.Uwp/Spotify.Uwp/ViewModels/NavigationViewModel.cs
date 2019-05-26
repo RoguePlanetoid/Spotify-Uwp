@@ -9,6 +9,11 @@ namespace Spotify.Uwp.ViewModels
     public class NavigationViewModel<TViewModel> : ErrorViewModel
     {
         /// <summary>
+        /// Type
+        /// </summary>
+        public object Type { get; set; }
+
+        /// <summary>
         /// Offset
         /// </summary>
         public int Offset { get; set; }

@@ -11,9 +11,6 @@ namespace Spotify.Uwp.Test
     [TestClass]
     public class SpotifySdkClientTest
     {
-        private readonly Uri redirect_url = new Uri("https://www.example.org/spotify");
-        private const string state = "spotify.state";
-
         private ISpotifySdkClient _client = null;
 
         /// <summary>
@@ -32,22 +29,6 @@ namespace Spotify.Uwp.Test
                 config["client_id"], config["client_secret"]).Set("GB");
             Assert.IsNotNull(_client);
         }
-
-        #region Authentication Methods
-        [TestMethod]
-        public void Test_Get_AuthorisationCodeFlowUri()
-        {
-            var uri = _client.GetAuthorisationCodeFlowUri(redirect_url, state, ScopeViewModel.AllPermissions);
-            Assert.IsNotNull(uri);
-        }
-
-        [TestMethod]
-        public void Test_Get_ImplicitGrantFlowUri()
-        {
-            var uri = _client.GetImplicitGrantFlowUri(redirect_url, state, ScopeViewModel.AllPermissions);
-            Assert.IsNotNull(uri);
-        }
-        #endregion Authentication Methods
 
         #region Get Methods
         [TestMethod]
