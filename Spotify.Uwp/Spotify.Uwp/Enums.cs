@@ -38,7 +38,8 @@
     {
         Favourites,
         Search,
-        Related
+        Related,
+        Followed
     }
 
     public enum FavouriteType

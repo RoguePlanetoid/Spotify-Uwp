@@ -380,6 +380,7 @@ namespace Spotify.Uwp.Internal
             try
             {
                 var page = (Limit != null) ? new Page() { Limit = Limit.Value } : null;
+                var cursor = (Limit != null) ? new Cursor() { Limit = Limit.Value } : null;
                 switch (type)
                 {
                     case ArtistType.Favourites:
@@ -401,6 +402,12 @@ namespace Spotify.Uwp.Internal
                             itemId: id);
                         result = Mapping.MapArtistList(related?.Artists);
                         result = Mapping.MapError(related, result);
+                        break;
+                    case ArtistType.Followed:
+                        var followed = await SpotifyClient.AuthLookupFollowedArtistsAsync(
+                            cursor: cursor);
+                        result = Mapping.MapCursorArtist(followed);
+                        result = Mapping.MapError(followed, result);
                         break;
                 }
             }

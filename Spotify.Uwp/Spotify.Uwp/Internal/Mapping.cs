@@ -342,6 +342,20 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
+        public static NavigationViewModel<ArtistViewModel> MapCursorArtist(CursorPaging<Artist> source)
+        {
+            if (source == null) return null;
+            var result = new NavigationViewModel<ArtistViewModel>()
+            {
+                Limit = source.Limit ?? 0,
+                Next = source.Next,
+                Back = source.Before,
+                Total = source.Total,
+                Items = source.Items.ConvertAll(MapArtist)
+            };
+            return result;
+        }
+
         public static NavigationViewModel<AlbumViewModel> MapPagingAlbum(Paging<Album> source)
         {
             if (source == null) return null;

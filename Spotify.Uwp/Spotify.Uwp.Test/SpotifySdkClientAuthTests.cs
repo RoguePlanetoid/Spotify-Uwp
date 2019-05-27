@@ -73,6 +73,14 @@ namespace Spotify.Uwp.Test
             Assert.IsNotNull(items?.Items);
             Assert.IsTrue(items?.Items.Count > 0);
         }
+
+        [TestMethod]
+        public async Task Test_ListArtists_Followed()
+        {
+            var items = await _client.ListArtistsAsync(ArtistType.Followed);
+            Assert.IsNotNull(items?.Items);
+            Assert.IsTrue(items?.Items.Count > 0);
+        }
         #endregion List Methods
     }
 }
