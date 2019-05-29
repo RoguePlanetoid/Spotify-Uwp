@@ -647,8 +647,7 @@ namespace Spotify.Uwp.Internal
                 Total = source.Total,
                 Next = source.Next,
                 Before = source.Back,
-                Limit = source.Limit,
-                
+                Limit = source.Limit,          
                 Error = new ErrorResponse()
                 {
                     Message = source.Message,

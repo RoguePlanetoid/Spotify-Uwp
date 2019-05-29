@@ -1,78 +1,48 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.UI.Xaml.Data;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Spotify.Uwp.ViewModels
 {
     /// <summary>
-    /// List Artist
+    /// List Artist View Model
     /// </summary>
-    public class ListArtistViewModel : ObservableCollection<ArtistViewModel>,
-        ISupportIncrementalLoading, IDisposable
+    public class ListArtistViewModel : BaseListViewModel<ArtistViewModel>, IDisposable
     {
         #region Private Members
+        private string _id;
+        private AlbumType _type;
+        private ISpotifySdkClient _client;
         private NavigationViewModel<ArtistViewModel> _results = null;
-        private ISpotifySdkClient _client = null;
-        private bool _hasMore = true;
-        private int _count = 0;
         #endregion Private Members
-
-        #region Private Methods
-        /// <summary>
-        /// Init
-        /// </summary>
-        private async void Init(
-            ArtistType type,
-            string id = null)
-        {
-            _results = await _client.ListArtistsAsync(type, id);
-            _count = _results?.Items?.Count ?? 0;
-            if (_count > 0)
-            {
-                _results.Items.ForEach(f => Add(f));
-            }
-        }
-        #endregion Private Methods
 
         #region Constructor
         /// <summary>Constructor</summary>
+        /// <param name="client">Music Client</param>
+        /// <param name="type">Artist Type</param>
+        /// <param name="id">Id</param>
         public ListArtistViewModel(
             ISpotifySdkClient client,
-            ArtistType type,
+            AlbumType type,
             string id = null)
         {
             _client = client;
-            Init(type, id);
+            _type = type;
+            _id = id;
         }
         #endregion Constructor
 
         #region Public Methods
         /// <summary>
-        /// Has More Items
+        /// Load Data
         /// </summary>
-        public bool HasMoreItems =>
-            (Count < _results?.Total && _hasMore);
-
-        /// <summary>LoadMoreItemsAsync</summary>
-        /// <param name="count">Count</param>
-        /// <returns>Items</returns>
-        public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
+        /// <returns>IEnumerable of Album View Model</returns>
+        protected override async Task<IEnumerable<ArtistViewModel>> LoadItemsAsync()
         {
-            return AsyncInfo.Run(async (task) =>
-            {
-                _results = await _client.ListArtistsAsync(_results);
-                _count = _results?.Items?.Count ?? 0;
-                if (_count > 0)
-                    _results?.Items?.ForEach(item => Add(item));
-                else
-                    _hasMore = false;
-                return new LoadMoreItemsResult()
-                {
-                    Count = (uint)_count
-                };
-            });
+            _results = _results == null ?
+            await _client.ListArtistsAsync(_type, _id) :
+            await _client.ListArtistsAsync(_results);
+            return _results?.Items;
         }
 
         /// <summary>Dispose</summary>

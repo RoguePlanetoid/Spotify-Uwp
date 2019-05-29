@@ -148,6 +148,7 @@
     <Compile Include="ViewModels\Lists\ListPlaylistViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListRecommendationViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListTrackViewModel.cs" />
+    <Compile Include="ViewModels\Lists\BaseListViewModel.cs" />
     <Compile Include="ViewModels\NavigationViewModel.cs" />
     <Compile Include="ViewModels\PlaylistViewModel.cs" />
     <Compile Include="ViewModels\PublicUserViewModel.cs" />

@@ -710,18 +710,24 @@ namespace Spotify.Uwp.Internal
                 if (type == TrackType.Saved)
                 {
                     var cursor = Mapping.MapNavigationCursor<SavedTrack, TrackViewModel>(navigation);
-                    var response = await SpotifyClient.AuthNavigateAsync(
-                        cursor, NavigateType.Next);
-                    result = Mapping.MapCursorTrack(response, type);
-                    result = Mapping.MapError(response, result);
+                    if (cursor.Next != null)
+                    {
+                        var response = await SpotifyClient.AuthNavigateAsync(
+                            cursor, NavigateType.Next);
+                        result = Mapping.MapCursorTrack(response, type);
+                        result = Mapping.MapError(response, result);
+                    }
                 }
                 else
                 {
                     var paging = Mapping.MapNavigationPaging<Track, TrackViewModel>(navigation);
-                    var response = await SpotifyClient.NavigateAsync(
-                        paging, NavigateType.Next);
-                    result = Mapping.MapPagingTrack(response?.Tracks, type);
-                    result = Mapping.MapError(response, result);
+                    if (paging.Next != null)
+                    {
+                        var response = await SpotifyClient.NavigateAsync(
+                            paging, NavigateType.Next);
+                        result = Mapping.MapPagingTrack(response?.Tracks, type);
+                        result = Mapping.MapError(response, result);
+                    }
                 }
             }
             catch (AuthAccessTokenRequiredException)
