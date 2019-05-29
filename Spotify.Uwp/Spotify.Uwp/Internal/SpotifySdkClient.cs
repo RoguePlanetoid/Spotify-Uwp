@@ -353,10 +353,13 @@ namespace Spotify.Uwp.Internal
             try
             {
                 var paging = Mapping.MapNavigationPaging<Category, CategoryViewModel>(navigation);
-                var response = await SpotifyClient.NavigateAsync(
+                if (paging.Next != null)
+                {
+                    var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
-                result = Mapping.MapPagingCategory(response?.Categories);
-                result = Mapping.MapError(response, result);
+                    result = Mapping.MapPagingCategory(response?.Categories);
+                    result = Mapping.MapError(response, result);
+                }
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -430,10 +433,13 @@ namespace Spotify.Uwp.Internal
             try
             {
                 var paging = Mapping.MapNavigationPaging<Artist, ArtistViewModel>(navigation);
-                var response = await SpotifyClient.NavigateAsync(
+                if (paging.Next != null)
+                {
+                    var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
-                result = Mapping.MapPagingArtist(response?.Artists);
-                result = Mapping.MapError(response, result);
+                    result = Mapping.MapPagingArtist(response?.Artists);
+                    result = Mapping.MapError(response, result);
+                }
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -519,10 +525,13 @@ namespace Spotify.Uwp.Internal
             {
 
                 var paging = Mapping.MapNavigationPaging<Album, AlbumViewModel>(navigation);
-                var response = await SpotifyClient.NavigateAsync(
+                if (paging.Next != null)
+                {
+                    var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
-                result = Mapping.MapPagingAlbum(response?.Albums);
-                result = Mapping.MapError(response, result);
+                    result = Mapping.MapPagingAlbum(response?.Albums);
+                    result = Mapping.MapError(response, result);
+                }
             }
             catch (AuthAccessTokenRequiredException)
             {
@@ -587,10 +596,13 @@ namespace Spotify.Uwp.Internal
             try
             {
                 var paging = Mapping.MapNavigationPaging<Playlist, PlaylistViewModel>(navigation);
-                var response = await SpotifyClient.NavigateAsync(
+                if (paging.Next != null)
+                {
+                    var response = await SpotifyClient.NavigateAsync(
                     paging, NavigateType.Next);
-                result = Mapping.MapPagingPlaylist(response?.Playlists);
-                result = Mapping.MapError(response, result);
+                    result = Mapping.MapPagingPlaylist(response?.Playlists);
+                    result = Mapping.MapError(response, result);
+                }
             }
             catch (AuthAccessTokenRequiredException)
             {
