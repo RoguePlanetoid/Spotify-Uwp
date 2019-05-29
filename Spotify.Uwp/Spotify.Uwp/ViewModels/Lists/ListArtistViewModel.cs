@@ -11,7 +11,7 @@ namespace Spotify.Uwp.ViewModels
     {
         #region Private Members
         private string _id;
-        private AlbumType _type;
+        private ArtistType _type;
         private ISpotifySdkClient _client;
         private NavigationViewModel<ArtistViewModel> _results = null;
         #endregion Private Members
@@ -23,7 +23,7 @@ namespace Spotify.Uwp.ViewModels
         /// <param name="id">Id</param>
         public ListArtistViewModel(
             ISpotifySdkClient client,
-            AlbumType type,
+            ArtistType type,
             string id = null)
         {
             _client = client;
