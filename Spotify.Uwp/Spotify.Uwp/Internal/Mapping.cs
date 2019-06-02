@@ -353,11 +353,13 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static NavigationViewModel<ArtistViewModel> MapPagingArtist(Paging<Artist> source)
+        public static NavigationViewModel<ArtistViewModel> MapPagingArtist(
+            Paging<Artist> source, ArtistType type)
         {
             if (source == null) return null;
             var result = new NavigationViewModel<ArtistViewModel>()
             {
+                Type = type,
                 Limit = source.Limit,
                 Next = source.Next,
                 Offset = source.Offset,
@@ -384,11 +386,13 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static NavigationViewModel<AlbumViewModel> MapPagingAlbum(Paging<Album> source)
+        public static NavigationViewModel<AlbumViewModel> MapPagingAlbum(
+            Paging<Album> source, AlbumType type)
         {
             if (source == null) return null;
             var result = new NavigationViewModel<AlbumViewModel>()
             {
+                Type = type,
                 Limit = source.Limit,
                 Next = source.Next,
                 Offset = source.Offset,
@@ -415,11 +419,13 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static NavigationViewModel<PlaylistViewModel> MapPagingPlaylist(Paging<Playlist> source)
+        public static NavigationViewModel<PlaylistViewModel> MapPagingPlaylist(
+            Paging<Playlist> source, PlaylistType type)
         {
             if (source == null) return null;
             var result = new NavigationViewModel<PlaylistViewModel>()
             {
+                Type = type,
                 Limit = source.Limit,
                 Next = source.Next,
                 Offset = source.Offset,
@@ -762,11 +768,12 @@ namespace Spotify.Uwp.Internal
             return result;
         }
 
-        public static NavigationViewModel<AlbumViewModel> MapAlbumList(List<Album> source)
+        public static NavigationViewModel<AlbumViewModel> MapAlbumList(List<Album> source, AlbumType type)
         {
             if (source == null) return null;
             var result = new NavigationViewModel<AlbumViewModel>()
             {
+                Type = type,
                 Total = source?.Count ?? 0,
                 Items = source?.ConvertAll(MapAlbum)
             };
