@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Spotify.Uwp.ViewModels
@@ -7,13 +6,11 @@ namespace Spotify.Uwp.ViewModels
     /// <summary>
     /// List Artist View Model
     /// </summary>
-    public class ListArtistViewModel : BaseListViewModel<ArtistViewModel>, IDisposable
+    public class ListArtistViewModel : BaseListViewModel<ArtistViewModel>
     {
         #region Private Members
         private string _id;
         private ArtistType _type;
-        private ISpotifySdkClient _client;
-        private NavigationViewModel<ArtistViewModel> _results = null;
         #endregion Private Members
 
         #region Constructor
@@ -25,8 +22,8 @@ namespace Spotify.Uwp.ViewModels
             ISpotifySdkClient client,
             ArtistType type,
             string id = null)
+            : base(client)
         {
-            _client = client;
             _type = type;
             _id = id;
         }
@@ -39,15 +36,11 @@ namespace Spotify.Uwp.ViewModels
         /// <returns>IEnumerable of Album View Model</returns>
         protected override async Task<IEnumerable<ArtistViewModel>> LoadItemsAsync()
         {
-            _results = _results == null ?
-            await _client.ListArtistsAsync(_type, _id) :
-            await _client.ListArtistsAsync(_results);
-            return _results?.Items;
+            Results = Results == null ?
+            await Client.ListArtistsAsync(_type, _id) :
+            await Client.ListArtistsAsync(Results);
+            return Results?.Items;
         }
-
-        /// <summary>Dispose</summary>
-        public void Dispose() =>
-            _client = null;
         #endregion Public Methods
     }
 }

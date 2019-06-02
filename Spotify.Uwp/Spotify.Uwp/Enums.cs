@@ -11,7 +11,8 @@
     {
         Search,
         Featured,
-        CategoriesPlaylists
+        CategoriesPlaylists,
+        CurrentUser
     }
 
     public enum TrackType
@@ -22,6 +23,7 @@
         Playlist,
         Album,
         Artist,
+        RecentlyPlayed,
         Saved
     }
 

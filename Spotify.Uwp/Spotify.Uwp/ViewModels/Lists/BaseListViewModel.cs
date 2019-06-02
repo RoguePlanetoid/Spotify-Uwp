@@ -15,7 +15,7 @@ namespace Spotify.Uwp.ViewModels
     /// <typeparam name="TViewModel"></typeparam>
     public abstract class BaseListViewModel<TViewModel> : 
         ObservableCollection<TViewModel>, 
-        ISupportIncrementalLoading
+        ISupportIncrementalLoading, IDisposable
     {
         #region Private Members
         private bool _hasMoreItems = true;
@@ -42,6 +42,15 @@ namespace Spotify.Uwp.ViewModels
         }
         #endregion Private Methods
 
+        #region Constructor
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="client"></param>
+        public BaseListViewModel(ISpotifySdkClient client) => 
+            Client = client;
+        #endregion Constructor
+
         #region Public Methods
         /// <summary>
         /// Load More Items
@@ -57,7 +66,23 @@ namespace Spotify.Uwp.ViewModels
         /// <returns>IEnumerable of TViewModel</returns>
         protected virtual async Task<IEnumerable<TViewModel>> LoadItemsAsync() =>
             await Task.FromException<IEnumerable<TViewModel>>(new NotImplementedException());
+
+        /// <summary>Dispose</summary>
+        public void Dispose() =>
+            Client = null;
         #endregion Public Methods
+
+        #region Protected Properties
+        /// <summary>
+        /// Spotify SDK Client
+        /// </summary>
+        protected ISpotifySdkClient Client { get; set; }
+
+        /// <summary>
+        /// Navigation View Model of View Model Type
+        /// </summary>
+        protected NavigationViewModel<TViewModel> Results { get; set; }
+        #endregion Protected Properties
 
         #region Public Properties
         /// <summary>
