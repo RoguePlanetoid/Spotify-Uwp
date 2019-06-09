@@ -33,5 +33,20 @@ namespace Spotify.Uwp.ViewModels
         /// Scopes
         /// </summary>
         public string Scopes { get; set; }
+
+        /// <summary>
+        /// Error
+        /// </summary>
+        public string Error { get; set; }
+
+        /// <summary>
+        /// Is Valid
+        /// </summary>
+        public bool IsValid => !string.IsNullOrEmpty(Token) && DateTime.UtcNow < Expiration;
+
+        /// <summary>
+        /// Is Logged In
+        /// </summary>
+        public bool IsLoggedIn => IsValid && TokenType == TokenType.User;
     }
 }

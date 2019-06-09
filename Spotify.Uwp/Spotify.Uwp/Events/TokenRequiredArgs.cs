@@ -1,22 +1,22 @@
 ﻿using System;
 
-namespace Spotify.Uwp.Exceptions
+namespace Spotify.Uwp
 {
     /// <summary>
-    /// Token Required Exception
+    /// Token Required Arguments
     /// </summary>
-    public class TokenRequiredException : Exception
+    public class TokenRequiredArgs : EventArgs
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="tokenType">Token Type</param>
-        public TokenRequiredException(TokenType tokenType) => 
+        public TokenRequiredArgs(TokenType tokenType) =>
             TokenType = tokenType;
 
         /// <summary>
         /// Token Type
         /// </summary>
-        public TokenType TokenType { get; }
+        public TokenType TokenType { get; set; }
     }
 }

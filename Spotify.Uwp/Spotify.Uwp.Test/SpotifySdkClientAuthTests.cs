@@ -28,7 +28,10 @@ namespace Spotify.Uwp.Test
             IConfiguration config = configBuilder.Build();
             // Spotify Client Factory
             _client = SpotifySdkClientFactory.CreateSpotifySdkClient(
-                config["client_id"], config["client_secret"]).Set("GB");
+                clientId: config["client_id"], 
+                clientSecret: config["client_secret"],
+                loginRedirectUri: redirect_url, 
+                loginState: state).Set("GB");
             Assert.IsNotNull(_client);
             // Spotify Client Token
             var accessToken = new TokenViewModel()
@@ -45,14 +48,14 @@ namespace Spotify.Uwp.Test
         [TestMethod]
         public void Test_Get_AuthorisationCodeFlowUri()
         {
-            var uri = _client.GetAuthorisationCodeFlowUri(redirect_url, state, ScopeViewModel.AllPermissions);
+            var uri = _client.GetLoginUri(LoginType.AuthorisationCode, ScopeViewModel.AllPermissions);
             Assert.IsNotNull(uri);
         }
 
         [TestMethod]
         public void Test_Get_ImplicitGrantFlowUri()
         {
-            var uri = _client.GetImplicitGrantFlowUri(redirect_url, state, ScopeViewModel.AllPermissions);
+            var uri = _client.GetLoginUri(LoginType.ImplicitGrant, ScopeViewModel.AllPermissions);
             Assert.IsNotNull(uri);
         }
         #endregion Authentication Methods
@@ -61,7 +64,7 @@ namespace Spotify.Uwp.Test
         [TestMethod]
         public async Task Test_ListAlbums_Saved()
         {
-            var items = await _client.ListAlbumsAsync(AlbumType.Saved);
+            var items = await _client.ListAlbumsAsync(AlbumType.UserSaved);
             Assert.IsNotNull(items?.Items);
             Assert.IsTrue(items?.Items.Count > 0);
         }
@@ -69,7 +72,7 @@ namespace Spotify.Uwp.Test
         [TestMethod]
         public async Task Test_ListTracks_Saved()
         {
-            var items = await _client.ListTracksAsync(TrackType.Saved);
+            var items = await _client.ListTracksAsync(TrackType.UserSaved);
             Assert.IsNotNull(items?.Items);
             Assert.IsTrue(items?.Items.Count > 0);
         }
@@ -77,10 +80,44 @@ namespace Spotify.Uwp.Test
         [TestMethod]
         public async Task Test_ListArtists_Followed()
         {
-            var items = await _client.ListArtistsAsync(ArtistType.Followed);
+            var items = await _client.ListArtistsAsync(ArtistType.UserFollowed);
             Assert.IsNotNull(items?.Items);
             Assert.IsTrue(items?.Items.Count > 0);
         }
         #endregion List Methods
+
+        #region Personalisation
+        [TestMethod]
+        public async Task Test_ListTracks_Top()
+        {
+            var items = await _client.ListTracksAsync(TrackType.UserTop);
+            Assert.IsNotNull(items?.Items);
+            Assert.IsTrue(items?.Items.Count > 0);
+        }
+
+        [TestMethod]
+        public async Task Test_ListArtists_Top()
+        {
+            var items = await _client.ListArtistsAsync(ArtistType.UserTop);
+            Assert.IsNotNull(items?.Items);
+            Assert.IsTrue(items?.Items.Count > 0);
+        }
+        #endregion Personalisation
+
+        #region User Profile
+        [TestMethod]
+        public async Task Test_GetCurrentUser()
+        {
+            var item = await _client.GetCurrentUserAsync();
+            Assert.IsNotNull(item);
+        }
+
+        [TestMethod]
+        public async Task Test_GetUser()
+        {
+            var item = await _client.GetUserAsync("jmperezperez");
+            Assert.IsNotNull(item);
+        }
+        #endregion User Profile
     }
 }

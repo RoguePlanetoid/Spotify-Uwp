@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Spotify.Uwp.ViewModels
 {
     /// <summary>
-    /// List Track ViewModel
+    /// List Track View Model
     /// </summary>
     public class ListTrackViewModel : BaseListViewModel<TrackViewModel>
     {
@@ -16,6 +16,8 @@ namespace Spotify.Uwp.ViewModels
         #region Constructor
         /// <summary>Constructor</summary>
         /// <param name="client">Music Client</param>
+        /// <param name="type">Track Type</param>
+        /// <param name="id">(Optional) Id</param>
         public ListTrackViewModel(
             ISpotifySdkClient client,
             TrackType type,

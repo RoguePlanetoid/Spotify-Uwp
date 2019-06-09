@@ -1,13 +1,11 @@
 ﻿using Spotify.NetStandard.Requests;
 using Spotify.Uwp.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Spotify.Uwp.ViewModels
 {
+    /// <summary>
+    /// Scope View Model
+    /// </summary>
     public class ScopeViewModel
     {
         #region Playlists

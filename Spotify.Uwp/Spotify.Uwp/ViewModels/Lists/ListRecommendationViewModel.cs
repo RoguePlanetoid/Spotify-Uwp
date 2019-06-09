@@ -11,7 +11,6 @@ namespace Spotify.Uwp.ViewModels
         #region Constructor
         /// <summary>Constructor</summary>
         /// <param name="client">Music Client</param>
-        /// <param name="id">Id</param>
         public ListRecommendationViewModel(
             ISpotifySdkClient client)
             : base(client) { }

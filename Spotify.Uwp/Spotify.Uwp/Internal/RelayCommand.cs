@@ -3,6 +3,9 @@ using System.Windows.Input;
 
 namespace Spotify.Uwp.Internal
 {
+    /// <summary>
+    /// Relay Command
+    /// </summary>
     internal class RelayCommand : ICommand
     {
         private readonly Action<object> _execute;

@@ -3,7 +3,7 @@
 namespace Spotify.Uwp.ViewModels
 {
     /// <summary>
-    /// Segment ViewModel
+    /// Segment View Model
     /// </summary>
     public class SegmentViewModel : TimeIntervalViewModel
     {

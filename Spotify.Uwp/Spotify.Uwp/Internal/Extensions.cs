@@ -1,5 +1,4 @@
-﻿using Spotify.NetStandard.Responses;
-using Spotify.Uwp.ViewModels;
+﻿using Spotify.Uwp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -17,20 +17,50 @@ namespace Spotify.Uwp.Internal
     /// <summary>
     /// Spotify SDK Client
     /// </summary>
-    internal class SpotifySdkClient : ISpotifySdkClient
+    internal class SpotifySdkClient : BaseNotifyPropertyChanged, ISpotifySdkClient
     {
+        #region Private Members
+        private bool _isUserLoggedIn;
+        #endregion Private Members
+
+        #region Protected Methods
+        /// <summary>
+        /// On Token Required 
+        /// </summary>
+        /// <param name="tokenType">Token Type</param>
+        /// <exception cref="TokenRequiredException">If No Event Subscribers Event will be Raised</exception>
+        protected virtual void OnTokenRequired(TokenType tokenType)
+        {
+            var handler = TokenRequiredEvent;
+            if (handler != null)
+            {
+                handler(this, new TokenRequiredArgs(tokenType));
+            }
+            else
+            {
+                throw new TokenRequiredException(tokenType);
+            }
+        }
+        #endregion Protected Methods
+
         #region Constructor
         /// <summary>
         /// Spotify SDK Client
         /// </summary>
-        /// <param name="clientId">Spotify Client Id</param>
+        /// <param name="clientId">(Required) Spotify Client Id</param>
         /// <param name="clientSecret">Spotify Client Secret</param>
-        /// <param name="cultureInfo">Culture Info</param>
+        /// <param name="loginRedirectUri">Login Redirect Uri</param>
+        /// <param name="loginState">Login State</param>
         public SpotifySdkClient(
             string clientId,
-            string clientSecret) =>
-            SpotifyClient = SpotifyClientFactory.CreateSpotifyClient(
-                clientId, clientSecret);
+            string clientSecret = null,
+            Uri loginRedirectUri = null,
+            string loginState = null)
+        {
+            LoginRedirectUri = loginRedirectUri;
+            LoginState = loginState;
+            SpotifyClient = SpotifyClientFactory.CreateSpotifyClient(clientId, clientSecret);
+        }
         #endregion Constructor
 
         #region Public Methods
@@ -75,6 +105,16 @@ namespace Spotify.Uwp.Internal
         public ISpotifyClient SpotifyClient { get; }
 
         /// <summary>
+        /// Login Redirect Uri
+        /// </summary>
+        public Uri LoginRedirectUri { get; set; }
+
+        /// <summary>
+        /// Login State
+        /// </summary>
+        public string LoginState { get; set; }
+
+        /// <summary>
         /// ISO 3166-1 alpha-2 country code e.g. GB
         /// </summary>
         public string Country { get; set; } = null;
@@ -90,6 +130,20 @@ namespace Spotify.Uwp.Internal
         public int? Limit { get; set; } = null;
 
         /// <summary>
+        /// Time Frame for User Top Artists and Tracks. Long Term: calculated from several years of data and including all new data as it becomes available, Medium Term: (Default) approximately last 6 months, Short Term: approximately last 4 weeks
+        /// </summary>
+        public UserTopTimeFrame UserTopTimeFrame { get; set; } = UserTopTimeFrame.ShortTerm;
+
+        /// <summary>
+        /// Is User Logged In
+        /// </summary>
+        public bool IsUserLoggedIn
+        {
+            get => _isUserLoggedIn;
+            set { _isUserLoggedIn = value; NotifyPropertyChanged(); }
+        }
+
+        /// <summary>
         /// Token View Model
         /// </summary>
         public TokenViewModel Token
@@ -99,79 +153,103 @@ namespace Spotify.Uwp.Internal
         }
 
         /// <summary>
-        /// List Favourite ViewModel 
+        /// List Favourite View Model 
         /// </summary>
         public ListFavouriteViewModel Favourites { get; set; } = new ListFavouriteViewModel();
         #endregion Public Properties
 
+        #region Public Events
+        /// <summary>
+        /// Token Required Event
+        /// </summary>
+        public event EventHandler<TokenRequiredArgs> TokenRequiredEvent;
+        #endregion Public Events
+
         #region Authentication Methods
         /// <summary>
-        /// Get Authorisation Code Flow Uri
+        /// Get Login Uri
         /// </summary>
-        /// <param name="redirectUri">Redirect Uri</param>
-        /// <param name="state">State for Request / Response Validation</param>
-        /// <param name="scope">Authorisation Scopes</param>
+        /// <param name="type">(Required) LoginType.AuthorisationCode or LoginType.ImplicitGrant</param>
+        /// <param name="scope">(Optional) Authorisation Scopes</param>
         /// <param name="showDialog">(Optional) Whether or not to force the user to approve the app again if they’ve already done so.</param>
-        /// <returns>Uri</returns>
-        public Uri GetAuthorisationCodeFlowUri(
-            Uri redirectUri,
-            string state,
-            ScopeViewModel scope,
-            bool showDialog = false) =>
-            SpotifyClient.AuthUser(redirectUri, state, Mapping.MapScope(scope), showDialog);
+        /// <exception cref="ArgumentNullException"></exception>
+        public Uri GetLoginUri(
+            LoginType type,
+            ScopeViewModel scope = null,
+            bool showDialog = false)
+        {
+            if (LoginRedirectUri == null)
+                throw new ArgumentNullException(nameof(LoginRedirectUri));
+            switch (type)
+            {
+                case LoginType.AuthorisationCode:
+                    return SpotifyClient.AuthUser(LoginRedirectUri, LoginState, Mapping.MapScope(scope), showDialog);
+                case LoginType.ClientCredentials:
+                    return null; // Client Credentials Unsupported
+                case LoginType.ImplicitGrant:
+                    return SpotifyClient.AuthUserImplicit(LoginRedirectUri, LoginState, Mapping.MapScope(scope), showDialog);
+                default:
+                    return null;
+            }
+        }
 
         /// <summary>
-        /// Get Authorisation Code Flow Token
+        /// Get Login Token
         /// </summary>
-        /// <param name="responseUri">Response Uri</param>
-        /// <param name="redirectUri">Redirect Uri</param>
-        /// <param name="state">State for Request Validation</param>
+        /// <param name="type">Login Type</param>
+        /// <param name="responseUri">(Required for LoginType.AuthorisationCode or LoginType.ImplicitGrant) Response Uri</param>
         /// <returns>AccessToken on Success, Null if Not</returns>
-        /// <exception cref="AuthCodeValueException">AuthCodeValueException</exception>
-        /// <exception cref="AuthCodeStateException">AuthCodeStateException</exception>
-        public async Task<TokenViewModel> GetAuthorisationCodeFlowTokenAsync(
-            Uri responseUri,
-            Uri redirectUri,
-            string state) =>
-                Mapping.MapToken(await SpotifyClient.AuthUserAsync(
-                responseUri, redirectUri, state));
-
-        /// <summary>
-        /// Get Client Credentials Flow Token
-        /// </summary>
-        /// <returns>AccessToken on Success, Null if Not</returns>
-        public async Task<TokenViewModel> GetClientCredentialsFlowTokenAsync() =>
-            Mapping.MapToken(await SpotifyClient.AuthAsync());
-
-        /// <summary>
-        /// Get Implicit Grant Flow Uri
-        /// </summary>
-        /// <param name="redirectUri">Redirect Uri</param>
-        /// <param name="state">State for Request / Response Validation</param>
-        /// <param name="scope">Authorisation Scopes</param>
-        /// <param name="showDialog">(Optional) Whether or not to force the user to approve the app again if they’ve already done so.</param>
-        /// <returns>Uri</returns>
-        public Uri GetImplicitGrantFlowUri(
-            Uri redirectUri,
-            string state,
-            ScopeViewModel scope,
-            bool showDialog = false) =>
-            SpotifyClient.AuthUserImplicit(redirectUri, state, Mapping.MapScope(scope), showDialog);
-
-        /// <summary>
-        /// Get Implicit Grant Flow Token
-        /// </summary>
-        /// <param name="responseUri">Response Uri</param>
-        /// <param name="redirectUri">Redirect Uri</param>
-        /// <param name="state">State for Request / Response Validation</param>
-        /// <returns>AccessToken on Success, Null if Not</returns>
-        /// <exception cref="AuthTokenValueException">AuthCodeValueException</exception>
-        /// <exception cref="AuthTokenStateException">AuthCodeStateException</exception>
-        public TokenViewModel GetImplicitGrantFlowToken(
-            Uri responseUri,
-            Uri redirectUri,
-            string state) =>
-            Mapping.MapToken(SpotifyClient.AuthUserImplicit(responseUri, redirectUri, state));
+        /// <exception cref="AuthValueException">AuthValueException</exception>
+        /// <exception cref="AuthStateException">AuthStateException</exception>
+        public async Task<TokenViewModel> GetLoginTokenAsync(
+            LoginType type,
+            Uri responseUri = null)
+        {
+            TokenViewModel model = null;
+            try
+            {
+                switch (type)
+                {
+                    case LoginType.AuthorisationCode:
+                        if (responseUri == null)
+                            throw new ArgumentNullException(nameof(responseUri));
+                        if (LoginRedirectUri == null)
+                            throw new ArgumentNullException(nameof(LoginRedirectUri));
+                        model = Mapping.MapToken(await SpotifyClient.AuthUserAsync(
+                            responseUri, LoginRedirectUri, LoginState));
+                        break;
+                    case LoginType.ClientCredentials:
+                        model = Mapping.MapToken(await SpotifyClient.AuthAsync());
+                        break;
+                    case LoginType.ImplicitGrant:
+                        if (responseUri == null)
+                            throw new ArgumentNullException(nameof(responseUri));
+                        if (LoginRedirectUri == null)
+                            throw new ArgumentNullException(nameof(LoginRedirectUri));
+                        model = Mapping.MapToken(SpotifyClient.AuthUserImplicit(
+                            responseUri, LoginRedirectUri, LoginState));
+                        break;
+                }
+                IsUserLoggedIn = model.IsLoggedIn;
+            }
+            catch (AuthCodeValueException ex)
+            {
+                throw new AuthValueException(ex.Message, ex);
+            }
+            catch (AuthCodeStateException ex)
+            {
+                throw new AuthStateException(ex.Message, ex);
+            }
+            catch (AuthTokenValueException ex)
+            {
+                throw new AuthValueException(ex.Message, ex);
+            }
+            catch (AuthTokenStateException ex)
+            {
+                throw new AuthStateException(ex.Message, ex);
+            }
+            return model;
+        }
         #endregion Authentication Methods
 
         #region Get Methods
@@ -179,8 +257,8 @@ namespace Spotify.Uwp.Internal
         /// Get Category
         /// </summary>
         /// <param name="id">Category Id</param>
-        /// <param name="page">Page</param>
-        /// <returns>Category ViewModel</returns>
+        /// <returns>Category View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<CategoryViewModel> GetCategoryAsync(
             string id)
         {
@@ -196,7 +274,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return result;
         }
@@ -205,7 +283,8 @@ namespace Spotify.Uwp.Internal
         /// Get Artist
         /// </summary>
         /// <param name="id">Artist Spotify Id</param>
-        /// <returns>Artist ViewModel</returns>
+        /// <returns>Artist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<ArtistViewModel> GetArtistAsync(
             string id)
         {
@@ -219,7 +298,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return result;
         }
@@ -229,6 +308,7 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="id">Album Spotify Id</param>
         /// <returns>Album View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<AlbumViewModel> GetAlbumAsync(
             string id)
         {
@@ -242,7 +322,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return result;
         }
@@ -251,7 +331,8 @@ namespace Spotify.Uwp.Internal
         /// Get Playlist
         /// </summary>
         /// <param name="id">Playlist Spotify Id</param>
-        /// <returns>Playlist ViewModel</returns>
+        /// <returns>Playlist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<PlaylistViewModel> GetPlaylistAsync(
             string id)
         {
@@ -265,7 +346,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return result;
         }
@@ -274,7 +355,8 @@ namespace Spotify.Uwp.Internal
         /// Get Track
         /// </summary>
         /// <param name="id">Track Spotify Id</param>
-        /// <returns>Track ViewModel</returns>
+        /// <returns>Track View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<TrackViewModel> GetTrackAsync(
             string id)
         {
@@ -288,7 +370,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return result;
         }
@@ -297,7 +379,8 @@ namespace Spotify.Uwp.Internal
         /// Get Audio Analysis
         /// </summary>
         /// <param name="id">Track Spotify Id</param>
-        /// <returns>AudioAnalysis ViewModel</returns>
+        /// <returns>AudioAnalysis View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<AudioAnalysisViewModel> GetAudioAnalysisAsync(
             string id)
         {
@@ -311,7 +394,52 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Get User
+        /// </summary>
+        /// <param name="id">User Spotify Id</param>
+        /// <returns>Public User View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        public async Task<UserViewModel> GetUserAsync(
+            string id)
+        {
+            UserViewModel result = null;
+            try
+            {
+                var response = await SpotifyClient.AuthLookupUserProfileAsync(id);
+                result = Mapping.MapUser(response);
+                result = Mapping.MapError(response, result);
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                OnTokenRequired(TokenType.User);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Get Current User
+        /// <para>Scopes: UserReadPrivate, UserReadEmail, UserReadBirthDate, UserReadPrivate</para>
+        /// </summary>
+        /// <returns>Current User View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        public async Task<CurrentUserViewModel> GetCurrentUserAsync()
+        {
+            CurrentUserViewModel result = null;
+            try
+            {
+                var response = await SpotifyClient.AuthLookupUserProfileAsync();
+                result = Mapping.MapCurrentUser(response);
+                result = Mapping.MapError(response, result);
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -321,9 +449,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Category
         /// </summary>
-        /// <returns>Navigation ViewModel of Category ViewModel</returns>
-        public async Task<NavigationViewModel<CategoryViewModel>>
-            ListCategoriesAsync()
+        /// <returns>Navigation ViewModel of Category View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        public async Task<NavigationViewModel<CategoryViewModel>> ListCategoriesAsync()
         {
             NavigationViewModel<CategoryViewModel> result = null;
             try
@@ -336,7 +464,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return result;
         }
@@ -344,10 +472,11 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Categories
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Category ViewModel</param>
-        /// <returns>Navigation ViewModel of Category ViewModel</returns>
-        public async Task<NavigationViewModel<CategoryViewModel>>
-            ListCategoriesAsync(NavigationViewModel<CategoryViewModel> navigation)
+        /// <param name="navigation">Navigation View Model of Category View Model</param>
+        /// <returns>Navigation ViewModel of Category View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        public async Task<NavigationViewModel<CategoryViewModel>> ListCategoriesAsync(
+            NavigationViewModel<CategoryViewModel> navigation)
         {
             NavigationViewModel<CategoryViewModel> result = null;
             try
@@ -363,7 +492,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return result;
         }
@@ -373,9 +502,9 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="type">Artist Type</param>
         /// <param name="id">Artist Spotify Id</param>
-        /// <returns>Navigation ViewModel of Artist ViewModel</returns>
-        public async Task<NavigationViewModel<ArtistViewModel>>
-            ListArtistsAsync(
+        /// <returns>Navigation ViewModel of Artist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        public async Task<NavigationViewModel<ArtistViewModel>> ListArtistsAsync(
             ArtistType type,
             string id = null)
         {
@@ -406,17 +535,27 @@ namespace Spotify.Uwp.Internal
                         result = Mapping.MapArtistList(related?.Artists);
                         result = Mapping.MapError(related, result);
                         break;
-                    case ArtistType.Followed:
+                    case ArtistType.UserFollowed:
                         var followed = await SpotifyClient.AuthLookupFollowedArtistsAsync(
                             cursor: cursor);
                         result = Mapping.MapCursorArtist(followed, type);
                         result = Mapping.MapError(followed, result);
                         break;
+                    case ArtistType.UserTop:
+                        var top = await SpotifyClient.AuthLookupUserTopArtistsAsync(
+                             cursor: cursor);
+                        result = Mapping.MapCursorArtist(top, type);
+                        result = Mapping.MapError(top, result);
+                        break;
                 }
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -424,8 +563,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Artists
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Artist ViewModel</param>
-        /// <returns>Navigation ViewModel of Artist ViewModel</returns>
+        /// <param name="navigation">Navigation View Model of Artist View Model</param>
+        /// <returns>Navigation View Model of Artist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<NavigationViewModel<ArtistViewModel>> ListArtistsAsync(
             NavigationViewModel<ArtistViewModel> navigation)
         {
@@ -435,7 +575,7 @@ namespace Spotify.Uwp.Internal
                 if (navigation.Type != null)
                 {
                     var type = (ArtistType)navigation.Type;
-                    if (type == ArtistType.Followed)
+                    if (type == ArtistType.UserFollowed || type == ArtistType.UserTop)
                     {
                         var cursor = Mapping.MapNavigationCursor<Artist, ArtistViewModel>(navigation);
                         if (cursor.Next != null)
@@ -461,7 +601,11 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -471,7 +615,8 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="type">Album Type</param>
         /// <param name="id">Album Spotify Id</param>
-        /// <returns>Navigation ViewModel of Album ViewModel</returns>
+        /// <returns>Navigation View Model of Album View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<NavigationViewModel<AlbumViewModel>>
             ListAlbumsAsync(
             AlbumType type,
@@ -511,7 +656,7 @@ namespace Spotify.Uwp.Internal
                         result = Mapping.MapPagingAlbum(albums, type);
                         result = Mapping.MapError(albums, result);
                         break;
-                    case AlbumType.Saved:
+                    case AlbumType.UserSaved:
                         var saved = await SpotifyClient.AuthLookupUserSavedAlbumsAsync(
                             market: Country, cursor: cursor);
                         result = Mapping.MapCursorAlbum(saved, type);
@@ -521,11 +666,11 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             catch (AuthUserTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.User);
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -533,8 +678,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Albums
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Album ViewModel</param>
-        /// <returns>Navigation ViewModel of Album ViewModel</returns>
+        /// <param name="navigation">Navigation View Model of Album View Model</param>
+        /// <returns>Navigation View Model of Album View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<NavigationViewModel<AlbumViewModel>> ListAlbumsAsync(
             NavigationViewModel<AlbumViewModel> navigation)
         {
@@ -544,7 +690,7 @@ namespace Spotify.Uwp.Internal
                 if (navigation.Type != null)
                 {
                     var type = (AlbumType)navigation.Type;
-                    if (type == AlbumType.Saved)
+                    if (type == AlbumType.UserSaved)
                     {
                         var cursor = Mapping.MapNavigationCursor<SavedAlbum, AlbumViewModel>(navigation);
                         if (cursor.Next != null)
@@ -570,11 +716,11 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             catch (AuthUserTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.User);
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -584,7 +730,8 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="type">Playlist Type</param>
         /// <param name="id">Playlist Spotify Id</param>
-        /// <returns>Navigation ViewModel of Playlist ViewModel</returns>
+        /// <returns>Navigation View Model of Playlist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<NavigationViewModel<PlaylistViewModel>>
             ListPlaylistsAsync(
             PlaylistType type,
@@ -619,9 +766,9 @@ namespace Spotify.Uwp.Internal
                         result = Mapping.MapPagingPlaylist(response?.Playlists, type);
                         result = Mapping.MapError(response, result);
                         break;
-                    case PlaylistType.CurrentUser:
+                    case PlaylistType.User:
                         var user = await SpotifyClient.AuthLookupUserPlaylistsAsync(
-                            cursor: cursor);
+                            userId: id, cursor: cursor);
                         result = Mapping.MapCursorPlaylist(user, type);
                         result = Mapping.MapError(user, result);
                         break;
@@ -629,11 +776,11 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             catch (AuthUserTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.User);
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -641,8 +788,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Playlists
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Playlist ViewModel</param>
-        /// <returns>Navigation ViewModel of Playlist ViewModel</returns>
+        /// <param name="navigation">Navigation View Model of Playlist View Model</param>
+        /// <returns>Navigation View Model of Playlist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<NavigationViewModel<PlaylistViewModel>> ListPlaylistsAsync(
             NavigationViewModel<PlaylistViewModel> navigation)
         {
@@ -652,7 +800,7 @@ namespace Spotify.Uwp.Internal
                 if (navigation.Type != null)
                 {
                     var type = (PlaylistType)navigation.Type;
-                    if (type == PlaylistType.CurrentUser)
+                    if (type == PlaylistType.User)
                     {
                         var cursor = Mapping.MapNavigationCursor<Playlist, PlaylistViewModel>(navigation);
                         if (cursor.Next != null)
@@ -678,11 +826,11 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             catch (AuthUserTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.User);
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -690,7 +838,8 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Recommendation Genres
         /// </summary>
-        /// <returns>List of Recommendation ViewModel</returns>
+        /// <returns>List of Recommendation View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<List<RecommendationViewModel>> ListRecommendationGenresAsync()
         {
             List<RecommendationViewModel> result = null;
@@ -701,7 +850,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return result;
         }
@@ -711,9 +860,9 @@ namespace Spotify.Uwp.Internal
         /// </summary>
         /// <param name="type">Track Type</param>
         /// <param name="id">Track Spotify Id</param>
-        /// <returns>Navigation ViewModel of Track ViewModel</returns>
-        public async Task<NavigationViewModel<TrackViewModel>>
-            ListTracksAsync(
+        /// <returns>Navigation View Model of Track View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        public async Task<NavigationViewModel<TrackViewModel>> ListTracksAsync(
             TrackType type,
             string id = null)
         {
@@ -764,27 +913,33 @@ namespace Spotify.Uwp.Internal
                         result = Mapping.MapTrackList(artistTracks?.Tracks, type);
                         result = Mapping.MapError(artistTracks, result);
                         break;
-                    case TrackType.RecentlyPlayed:
+                    case TrackType.UserRecentlyPlayed:
                         var played = await SpotifyClient.AuthLookupUserRecentlyPlayedTracksAsync(
                             cursor: cursor);
                         result = Mapping.MapCursorTrack(played, type);
                         result = Mapping.MapError(played, result);
                         break;
-                    case TrackType.Saved:
+                    case TrackType.UserSaved:
                         var saved = await SpotifyClient.AuthLookupUserSavedTracksAsync(
                             market: Country, cursor: cursor);
                         result = Mapping.MapCursorTrack(saved, type);
                         result = Mapping.MapError(saved, result);
                         break;
+                    case TrackType.UserTop:
+                        var top = await SpotifyClient.AuthLookupUserTopTracksAsync(
+                             cursor: cursor);
+                        result = Mapping.MapCursorTrack(top, type);
+                        result = Mapping.MapError(top, result);
+                        break;
                 }
-            }
-            catch (AuthUserTokenRequiredException)
-            {
-                throw new TokenRequiredException(TokenType.User);
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -792,8 +947,9 @@ namespace Spotify.Uwp.Internal
         /// <summary>
         /// List Tracks
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Track ViewModel</param>
-        /// <returns>Navigation ViewModel of Track ViewModel</returns>
+        /// <param name="navigation">Navigation View Model of Track View Model</param>
+        /// <returns>Navigation View Model of Track View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<NavigationViewModel<TrackViewModel>> ListTracksAsync(
             NavigationViewModel<TrackViewModel> navigation)
         {
@@ -803,7 +959,7 @@ namespace Spotify.Uwp.Internal
                 if (navigation.Type != null)
                 {
                     var type = (TrackType)navigation.Type;
-                    if (type == TrackType.RecentlyPlayed)
+                    if (type == TrackType.UserRecentlyPlayed)
                     {
                         var cursor = Mapping.MapNavigationCursor<PlayHistory, TrackViewModel>(navigation);
                         if (cursor.Next != null)
@@ -814,9 +970,20 @@ namespace Spotify.Uwp.Internal
                             result = Mapping.MapError(response, result);
                         }
                     }
-                    else if (type == TrackType.Saved)
+                    else if (type == TrackType.UserSaved)
                     {
                         var cursor = Mapping.MapNavigationCursor<SavedTrack, TrackViewModel>(navigation);
+                        if (cursor.Next != null)
+                        {
+                            var response = await SpotifyClient.AuthNavigateAsync(
+                                cursor, NavigateType.Next);
+                            result = Mapping.MapCursorTrack(response, type);
+                            result = Mapping.MapError(response, result);
+                        }
+                    }
+                    else if (type == TrackType.UserTop)
+                    {
+                        var cursor = Mapping.MapNavigationCursor<Track, TrackViewModel>(navigation);
                         if (cursor.Next != null)
                         {
                             var response = await SpotifyClient.AuthNavigateAsync(
@@ -840,11 +1007,11 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             catch (AuthUserTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.User);
+                OnTokenRequired(TokenType.User);
             }
             return result;
         }
@@ -853,7 +1020,8 @@ namespace Spotify.Uwp.Internal
         /// List Audio Features
         /// </summary>
         /// <param name="id">Track Spotify Id</param>
-        /// <returns>List of AudioFeatureViewModel</returns>
+        /// <returns>List of Audio Feature View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<List<AudioFeatureViewModel>> ListAudioFeatureAsync(
             string id)
         {
@@ -866,7 +1034,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+               OnTokenRequired(TokenType.Access);
             }
             return results;
         }
@@ -875,7 +1043,8 @@ namespace Spotify.Uwp.Internal
         /// List Audio Features
         /// </summary>
         /// <param name="ids">List of Track Spotify Id</param>
-        /// <returns>List of List of AudioFeature ViewModel</returns>
+        /// <returns>List of List of Audio Feature View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         public async Task<List<List<AudioFeatureViewModel>>> ListAudioFeaturesAsync(
             List<string> ids)
         {
@@ -888,7 +1057,7 @@ namespace Spotify.Uwp.Internal
             }
             catch (AuthAccessTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.Access);
+                OnTokenRequired(TokenType.Access);
             }
             return results;
         }
@@ -899,11 +1068,12 @@ namespace Spotify.Uwp.Internal
         /// Is Following Artists or Users and Check if Users Follow a Playlist
         /// <para>Scopes: FollowRead, PlaylistReadPrivate</para>
         /// </summary>
-        /// <param name="itemIds">(Required) List of the Artist or the User Spotify IDs to check</param>
-        /// <param name="followType">(Required) Either Artist or User</param>
+        /// <param name="ids">(Required for FollowType.Artist or FollowType.User) List of the Artist or the User Spotify IDs to check</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
         /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
         /// <returns>List of True or False values</returns>
-        /// <exception cref="TokenRequiredException"></exception>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public async Task<List<bool>> IsFollowing(
             List<string> ids,
             FollowType type,
@@ -914,9 +1084,11 @@ namespace Spotify.Uwp.Internal
                 switch (type)
                 {
                     case FollowType.Artist:
+                        if(ids == null) throw new ArgumentNullException(nameof(ids));
                         return await SpotifyClient.AuthLookupFollowingStateAsync(
                             ids, NetStandard.Enums.FollowType.Artist);
                     case FollowType.User:
+                        if (ids == null) throw new ArgumentNullException(nameof(ids));
                         return await SpotifyClient.AuthLookupFollowingStateAsync(
                         ids, NetStandard.Enums.FollowType.User);
                     case FollowType.Playlist:
@@ -924,26 +1096,133 @@ namespace Spotify.Uwp.Internal
                         return await SpotifyClient.AuthLookupUserFollowingPlaylistAsync(ids,
                             playlistId);
                 }
-                return null;
             }
             catch (AuthUserTokenRequiredException)
             {
-                throw new TokenRequiredException(TokenType.User);
+                OnTokenRequired(TokenType.User);
             }
+            return null;
         }
 
         /// <summary>
         /// Is Following
+        /// <para>Scopes: FollowRead, PlaylistReadPrivate</para>
         /// </summary>
-        /// <param name="itemIds">(Required) Artist or the User Spotify IDs to check</param>
-        /// <param name="followType">(Required) Either Artist or User</param>
-        /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
+        /// <param name="id">(Required) Artist, User or Playlist Spotify ID to check</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
         /// <returns>True if Is, False if Not</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
         public async Task<bool> IsFollowing(
             string id,
-            FollowType type, 
-            string playlistId = null) => 
-            (await IsFollowing(new List<string> { id }, type, playlistId)).FirstOrDefault();
+            FollowType type) => 
+            (await IsFollowing(new List<string> { id }, type, id)).FirstOrDefault();
+
+        /// <summary>
+        /// Follow
+        /// <para>Scopes: FollowModify</para>
+        /// </summary>
+        /// <param name="ids">(Required for FollowType.Artist or FollowType.User) Artist or the User Spotify IDs to Follow</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
+        /// <returns>True if Successful, False if Not Successful</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<bool> Follow(
+            List<string> ids,
+            FollowType type,
+            string playlistId = null)
+        {
+            try
+            {
+                switch (type)
+                {
+                    case FollowType.Artist:
+                        if (ids == null) throw new ArgumentNullException(nameof(ids));
+                        return (await SpotifyClient.AuthFollowAsync(
+                            ids, NetStandard.Enums.FollowType.Artist)).Success;
+                    case FollowType.User:
+                        if (ids == null) throw new ArgumentNullException(nameof(ids));
+                        return (await SpotifyClient.AuthFollowAsync(
+                            ids, NetStandard.Enums.FollowType.User)).Success;
+                    case FollowType.Playlist:
+                        if (playlistId == null) throw new ArgumentNullException(nameof(playlistId));
+                        return (await SpotifyClient.AuthFollowPlaylistAsync(playlistId)).Success;
+                }
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                OnTokenRequired(TokenType.User);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Follow
+        /// <para>Scopes: FollowModify</para>
+        /// </summary>
+        /// <param name="id">(Required) Artist, User or Playlist Spotify ID to Follow</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <returns>True if Is, False if Not</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<bool> Follow(
+            string id,
+            FollowType type) =>
+            (await Follow(new List<string> { id }, type, id));
+
+        /// <summary>
+        /// Unfollow
+        /// <para>Scopes: FollowModify, PlaylistModifyPublic, PlaylistModifyPrivate</para>
+        /// </summary>
+        /// <param name="ids">(Required for FollowType.Artist or FollowType.User) Artist or the User Spotify IDs to Follow</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
+        /// <returns>True if Successful, False if Not Successful</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<bool> Unfollow(
+            List<string> ids,
+            FollowType type,
+            string playlistId = null)
+        {
+            try
+            {
+                switch (type)
+                {
+                    case FollowType.Artist:
+                        if (ids == null) throw new ArgumentNullException(nameof(ids));
+                        return (await SpotifyClient.AuthUnfollowAsync(
+                            ids, NetStandard.Enums.FollowType.Artist)).Success;
+                    case FollowType.User:
+                        if (ids == null) throw new ArgumentNullException(nameof(ids));
+                        return (await SpotifyClient.AuthUnfollowAsync(
+                            ids, NetStandard.Enums.FollowType.User)).Success;
+                    case FollowType.Playlist:
+                        if (playlistId == null) throw new ArgumentNullException(nameof(playlistId));
+                        return (await SpotifyClient.AuthUnfollowPlaylistAsync(playlistId)).Success;
+                }
+            }
+            catch (AuthUserTokenRequiredException)
+            {
+                OnTokenRequired(TokenType.User);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Unfollow
+        /// <para>Scopes: FollowModify, PlaylistModifyPublic, PlaylistModifyPrivate</para>
+        /// </summary>
+        /// <param name="id">(Required) Artist or the User Spotify ID to Unfollow</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <returns>True if Is, False if Not</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<bool> Unfollow(
+            string id,
+            FollowType type) =>
+            (await Unfollow(new List<string> { id }, type, id));
         #endregion Follow Methods
     }
 }

@@ -26,6 +26,8 @@
     <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>Spotify.Uwp.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -121,6 +123,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
+    <Compile Include="Events\TokenRequiredArgs.cs" />
+    <Compile Include="Exceptions\AuthException.cs" />
     <Compile Include="Exceptions\TokenRequiredException.cs" />
     <Compile Include="ISpotifySdkClient.cs" />
     <Compile Include="Internal\SpotifySdkClient.cs" />
@@ -132,12 +136,16 @@
     <Compile Include="ViewModels\AudioAnalysisViewModel.cs" />
     <Compile Include="ViewModels\AudioFeatureViewModel.cs" />
     <Compile Include="ViewModels\CategoryViewModel.cs" />
+    <Compile Include="Base\BaseNotifyPropertyChanged.cs" />
+    <Compile Include="Base\BaseClient.cs" />
     <Compile Include="ViewModels\Commands\ToggleFavouriteViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\ContentViewModel.cs" />
     <Compile Include="ViewModels\CopyrightViewModel.cs" />
     <Compile Include="ViewModels\ErrorViewModel.cs" />
     <Compile Include="ViewModels\ExternalIdViewModel.cs" />
+    <Compile Include="ViewModels\Commands\ToggleFollowViewModel.cs" />
+    <Compile Include="ViewModels\FollowersViewModel.cs" />
     <Compile Include="ViewModels\ImageViewModel.cs" />
     <Compile Include="ViewModels\LinkedTrackViewModel.cs" />
     <Compile Include="ViewModels\Lists\ListAlbumViewModel.cs" />
@@ -151,7 +159,8 @@
     <Compile Include="ViewModels\Lists\BaseListViewModel.cs" />
     <Compile Include="ViewModels\NavigationViewModel.cs" />
     <Compile Include="ViewModels\PlaylistViewModel.cs" />
-    <Compile Include="ViewModels\PublicUserViewModel.cs" />
+    <Compile Include="ViewModels\CurrentUserViewModel.cs" />
+    <Compile Include="ViewModels\UserViewModel.cs" />
     <Compile Include="ViewModels\RecommendationGenreViewModel.cs" />
     <Compile Include="ViewModels\ScopeViewModel.cs" />
     <Compile Include="ViewModels\SectionViewModel.cs" />
@@ -169,7 +178,7 @@
       <Version>6.2.8</Version>
     </PackageReference>
     <PackageReference Include="Spotify.NetStandard">
-      <Version>1.1.0</Version>
+      <Version>1.1.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

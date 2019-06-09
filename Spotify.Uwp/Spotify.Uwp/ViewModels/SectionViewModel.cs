@@ -1,7 +1,7 @@
 ﻿namespace Spotify.Uwp.ViewModels
 {
     /// <summary>
-    /// Section ViewModel
+    /// Section View Model
     /// </summary>
     public class SectionViewModel : TimeIntervalViewModel
     {
