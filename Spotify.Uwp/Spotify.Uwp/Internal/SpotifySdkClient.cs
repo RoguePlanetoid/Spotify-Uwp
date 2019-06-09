@@ -767,8 +767,11 @@ namespace Spotify.Uwp.Internal
                         result = Mapping.MapError(response, result);
                         break;
                     case PlaylistType.User:
-                        var user = await SpotifyClient.AuthLookupUserPlaylistsAsync(
-                            userId: id, cursor: cursor);
+                        var user = (id != null) ? 
+                            await SpotifyClient.AuthLookupUserPlaylistsAsync(
+                            userId: id, cursor: cursor) : 
+                            await SpotifyClient.AuthLookupUserPlaylistsAsync(
+                                cursor: cursor);
                         result = Mapping.MapCursorPlaylist(user, type);
                         result = Mapping.MapError(user, result);
                         break;
