@@ -20,7 +20,7 @@ namespace Spotify.Uwp.ViewModels
         public NavigationViewModel<ArtistViewModel> Artists { get; set; }
 
         /// <summary>
-        /// Artist ViewModel
+        /// Artist View Model
         /// </summary>
         public ArtistViewModel Artist => Artists?.Items.FirstOrDefault();
 

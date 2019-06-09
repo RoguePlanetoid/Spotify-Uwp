@@ -1,5 +1,4 @@
-﻿using Spotify.NetStandard.Responses;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Spotify.Uwp.ViewModels
 {
@@ -11,7 +10,7 @@ namespace Spotify.Uwp.ViewModels
         /// <summary>
         /// Information about the followers of the artist.
         /// </summary>
-        public Followers Followers { get; set; }
+        public FollowersViewModel Followers { get; set; }
 
         /// <summary>
         /// A list of the genres the artist is associated with. For example: "Prog Rock" , "Post-Grunge".

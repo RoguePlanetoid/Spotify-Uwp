@@ -1,44 +1,28 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Spotify.Uwp.ViewModels
 {
     /// <summary>
     /// List Recommendation View Model
     /// </summary>
-    public class ListRecommendationViewModel : ObservableCollection<RecommendationViewModel>,
-        IDisposable
+    public class ListRecommendationViewModel : BaseListViewModel<RecommendationViewModel>
     {
-        #region Private Members
-        private ISpotifySdkClient _client = null;
-        #endregion Private Members
-
-        #region Private Methods
-        /// <summary>
-        /// Init
-        /// </summary>
-        private async void Init()
-        {
-            var response = await _client.ListRecommendationGenresAsync();
-            response.ForEach(f => Add(f));
-        }
-        #endregion Private Methods
-
         #region Constructor
         /// <summary>Constructor</summary>
         /// <param name="client">Music Client</param>
         public ListRecommendationViewModel(
             ISpotifySdkClient client)
-        {
-            _client = client;
-            Init();
-        }
+            : base(client) { }
         #endregion Constructor
 
         #region Public Methods
-        /// <summary>Dispose</summary>
-        public void Dispose() =>
-            _client = null;
+        /// <summary>
+        /// Load Data
+        /// </summary>
+        /// <returns>IEnumerable of Album View Model</returns>
+        protected override async Task<IEnumerable<RecommendationViewModel>> LoadItemsAsync() =>
+            await Client.ListRecommendationGenresAsync();
         #endregion Public Methods
     }
 }

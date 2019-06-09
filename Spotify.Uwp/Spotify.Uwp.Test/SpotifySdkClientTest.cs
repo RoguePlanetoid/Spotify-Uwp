@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Spotify.Uwp.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;

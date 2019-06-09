@@ -10,12 +10,21 @@ namespace Spotify.Uwp.ViewModels
     public class ListFavouriteViewModel
     {
         #region Public Properties
+        /// <summary>
+        /// Album Spotify Ids
+        /// </summary>
         [DataMember(Name = "albums")]
         public List<string> AlbumIds { get; set; } = new List<string>();
 
+        /// <summary>
+        /// Artist Spotify Ids
+        /// </summary>
         [DataMember(Name = "artists")]
         public List<string> ArtistIds { get; set; } = new List<string>();
 
+        /// <summary>
+        /// Track Spotify Ids
+        /// </summary>
         [DataMember(Name = "tracks")]
         public List<string> TrackIds { get; set; } = new List<string>();
         #endregion Public Properties
@@ -118,8 +127,7 @@ namespace Spotify.Uwp.ViewModels
         /// Any
         /// </summary>
         /// <param name="type">Type</param>
-        /// <param name="id">Id</param>
-        /// <returns></returns>
+        /// <returns>True if Present, False if Not</returns>
         public bool Any(FavouriteType type)
         {
             var result = false;

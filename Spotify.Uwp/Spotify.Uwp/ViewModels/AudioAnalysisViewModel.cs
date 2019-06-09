@@ -3,7 +3,7 @@
 namespace Spotify.Uwp.ViewModels
 {
     /// <summary>
-    /// Audio Analysis ViewModel
+    /// Audio Analysis View Model
     /// </summary>
     public class AudioAnalysisViewModel : ErrorViewModel
     {

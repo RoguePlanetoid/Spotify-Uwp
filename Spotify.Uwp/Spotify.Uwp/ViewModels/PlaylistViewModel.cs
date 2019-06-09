@@ -18,12 +18,12 @@
         /// <summary>
         /// Information about the followers of the playlist.
         /// </summary>
-        public int Followers { get; set; }
+        public FollowersViewModel Followers { get; set; }
 
         /// <summary>
         /// The user who owns the playlist
         /// </summary>
-        public PublicUserViewModel Owner { get; set; }
+        public UserViewModel Owner { get; set; }
 
         /// <summary>
         /// The playlist’s public/private status: true the playlist is public, false the playlist is private, null the playlist status is not relevant

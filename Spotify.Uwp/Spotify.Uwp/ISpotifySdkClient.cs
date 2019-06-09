@@ -1,5 +1,7 @@
 ﻿using Spotify.NetStandard.Client.Interfaces;
+using Spotify.Uwp.Exceptions;
 using Spotify.Uwp.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -18,6 +20,16 @@ namespace Spotify.Uwp
         ISpotifyClient SpotifyClient { get; }
 
         /// <summary>
+        /// Login Redirect Uri
+        /// </summary>
+        Uri LoginRedirectUri { get; set; }
+
+        /// <summary>
+        /// Login State
+        /// </summary>
+        string LoginState { get; set; }
+
+        /// <summary>
         /// ISO 3166-1 alpha-2 country code e.g. GB
         /// </summary>
         string Country { get; set; }
@@ -33,15 +45,32 @@ namespace Spotify.Uwp
         int? Limit { get; set; }
 
         /// <summary>
+        /// Time Frame for User Top Artists and Tracks. Long Term: calculated from several years of data and including all new data as it becomes available, Medium Term: (Default) approximately last 6 months, Short Term: approximately last 4 weeks
+        /// </summary>
+        UserTopTimeFrame UserTopTimeFrame { get; set; }
+
+        /// <summary>
+        /// Is User Logged In
+        /// </summary>
+        bool IsUserLoggedIn { get; set; }
+
+        /// <summary>
         /// Token View Model
         /// </summary>
         TokenViewModel Token { get; set; }
 
         /// <summary>
-        /// List Favourite ViewModel 
+        /// List Favourite View Model 
         /// </summary>
         ListFavouriteViewModel Favourites { get; set; }
         #endregion Public Properties
+
+        #region Public Events
+        /// <summary>
+        /// Token Required Event
+        /// </summary>
+        event EventHandler<TokenRequiredArgs> TokenRequiredEvent;
+        #endregion Public Events
 
         #region Public Methods
         /// <summary>
@@ -62,13 +91,39 @@ namespace Spotify.Uwp
             string locale = null);
         #endregion Public Methods
 
+        #region Authentication Methods
+        /// <summary>
+        /// Get Login Uri
+        /// </summary>
+        /// <param name="type">(Required) LoginType.AuthorisationCode or LoginType.ImplicitGrant</param>
+        /// <param name="scope">(Optional) Authorisation Scopes</param>
+        /// <param name="showDialog">(Optional) Whether or not to force the user to approve the app again if they’ve already done so.</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        Uri GetLoginUri(
+            LoginType type,
+            ScopeViewModel scope = null,
+            bool showDialog = false);
+
+        /// <summary>
+        /// Get Login Token
+        /// </summary>
+        /// <param name="type">Login Type</param>
+        /// <param name="responseUri">(Required for LoginType.AuthorisationCode or LoginType.ImplicitGrant) Response Uri</param>
+        /// <returns>AccessToken on Success, Null if Not</returns>
+        /// <exception cref="AuthValueException">AuthValueException</exception>
+        /// <exception cref="AuthStateException">AuthStateException</exception>
+        Task<TokenViewModel> GetLoginTokenAsync(
+            LoginType type,
+            Uri responseUri = null);
+        #endregion Authentication Methods
+
         #region Get Methods
         /// <summary>
         /// Get Category
         /// </summary>
         /// <param name="id">Category Id</param>
-        /// <param name="page">Page</param>
-        /// <returns>Category ViewModel</returns>
+        /// <returns>Category View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<CategoryViewModel> GetCategoryAsync(
             string id);
 
@@ -76,7 +131,8 @@ namespace Spotify.Uwp
         /// Get Artist
         /// </summary>
         /// <param name="id">Artist Spotify Id</param>
-        /// <returns>Artist ViewModel</returns>
+        /// <returns>Artist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<ArtistViewModel> GetArtistAsync(
             string id);
 
@@ -85,6 +141,7 @@ namespace Spotify.Uwp
         /// </summary>
         /// <param name="id">Album Spotify Id</param>
         /// <returns>Album View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<AlbumViewModel> GetAlbumAsync(
             string id);
 
@@ -92,7 +149,8 @@ namespace Spotify.Uwp
         /// Get Playlist
         /// </summary>
         /// <param name="id">Playlist Spotify Id</param>
-        /// <returns>Playlist ViewModel</returns>
+        /// <returns>Playlist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<PlaylistViewModel> GetPlaylistAsync(
             string id);
 
@@ -100,7 +158,8 @@ namespace Spotify.Uwp
         /// Get Track
         /// </summary>
         /// <param name="id">Track Spotify Id</param>
-        /// <returns>Track ViewModel</returns>
+        /// <returns>Track View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<TrackViewModel> GetTrackAsync(
             string id);
 
@@ -108,43 +167,63 @@ namespace Spotify.Uwp
         /// Get Audio Analysis
         /// </summary>
         /// <param name="id">Track Spotify Id</param>
-        /// <returns>AudioAnalysis ViewModel</returns>
+        /// <returns>AudioAnalysis View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<AudioAnalysisViewModel> GetAudioAnalysisAsync(
             string id);
+
+        /// <summary>
+        /// Get User
+        /// </summary>
+        /// <param name="id">User Spotify Id</param>
+        /// <returns>Public User View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        Task<UserViewModel> GetUserAsync(
+            string id);
+
+        /// <summary>
+        /// Get Current User
+        /// <para>Scopes: UserReadPrivate, UserReadEmail, UserReadBirthDate, UserReadPrivate</para>
+        /// </summary>
+        /// <returns>Current User View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        Task<CurrentUserViewModel> GetCurrentUserAsync();
         #endregion Get Methods
 
         #region List Methods
         /// <summary>
         /// List Category
         /// </summary>
-        /// <returns>Navigation ViewModel of Category ViewModel</returns>
-        Task<NavigationViewModel<CategoryViewModel>>
-            ListCategoriesAsync();
+        /// <returns>Navigation View Model of Category View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        Task<NavigationViewModel<CategoryViewModel>> ListCategoriesAsync();
 
         /// <summary>
         /// List Categories
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Category ViewModel</param>
-        /// <returns>Navigation ViewModel of Category ViewModel</returns>
-        Task<NavigationViewModel<CategoryViewModel>>
-            ListCategoriesAsync(NavigationViewModel<CategoryViewModel> navigation);
+        /// <param name="navigation">Navigation View Model of Category View Model</param>
+        /// <returns>Navigation View Model of Category View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        Task<NavigationViewModel<CategoryViewModel>> ListCategoriesAsync(
+            NavigationViewModel<CategoryViewModel> navigation);
 
         /// <summary>
         /// List Artists
         /// </summary>
         /// <param name="type">Artist Type</param>
         /// <param name="id">Artist Spotify Id</param>
-        /// <returns>Navigation ViewModel of Artist ViewModel</returns>
-        Task<NavigationViewModel<ArtistViewModel>>
-            ListArtistsAsync(
+        /// <returns>Navigation View Model of Artist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        Task<NavigationViewModel<ArtistViewModel>> ListArtistsAsync(
             ArtistType type,
             string id = null);
 
         /// <summary>
         /// List Artists
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Artist ViewModel</param>
-        /// <returns>Navigation ViewModel of Artist ViewModel</returns>
+        /// <param name="navigation">Navigation View Model of Artist View Model</param>
+        /// <returns>Navigation View Model of Artist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<NavigationViewModel<ArtistViewModel>> ListArtistsAsync(
             NavigationViewModel<ArtistViewModel> navigation);
 
@@ -153,7 +232,8 @@ namespace Spotify.Uwp
         /// </summary>
         /// <param name="type">Album Type</param>
         /// <param name="id">Album Spotify Id</param>
-        /// <returns>Navigation ViewModel of Album ViewModel</returns>
+        /// <returns>Navigation View Model of Album View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<NavigationViewModel<AlbumViewModel>>
             ListAlbumsAsync(
             AlbumType type,
@@ -162,8 +242,9 @@ namespace Spotify.Uwp
         /// <summary>
         /// List Albums
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Album ViewModel</param>
-        /// <returns>Navigation ViewModel of Album ViewModel</returns>
+        /// <param name="navigation">Navigation View Model of Album View Model</param>
+        /// <returns>Navigation View Model of Album View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<NavigationViewModel<AlbumViewModel>> ListAlbumsAsync(
             NavigationViewModel<AlbumViewModel> navigation);
 
@@ -172,7 +253,8 @@ namespace Spotify.Uwp
         /// </summary>
         /// <param name="type">Playlist Type</param>
         /// <param name="id">Playlist Spotify Id</param>
-        /// <returns>Navigation ViewModel of Playlist ViewModel</returns>
+        /// <returns>Navigation View Model of Playlist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<NavigationViewModel<PlaylistViewModel>>
             ListPlaylistsAsync(
             PlaylistType type,
@@ -181,15 +263,17 @@ namespace Spotify.Uwp
         /// <summary>
         /// List Playlists
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Playlist ViewModel</param>
-        /// <returns>Navigation ViewModel of Playlist ViewModel</returns>
+        /// <param name="navigation">Navigation View Model of Playlist View Model</param>
+        /// <returns>Navigation View Model of Playlist View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<NavigationViewModel<PlaylistViewModel>> ListPlaylistsAsync(
             NavigationViewModel<PlaylistViewModel> navigation);
 
         /// <summary>
         /// List Recommendation Genres
         /// </summary>
-        /// <returns>List of Recommendation ViewModel</returns>
+        /// <returns>List of Recommendation View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<List<RecommendationViewModel>> ListRecommendationGenresAsync();
 
         /// <summary>
@@ -197,17 +281,18 @@ namespace Spotify.Uwp
         /// </summary>
         /// <param name="type">Track Type</param>
         /// <param name="id">Track Spotify Id</param>
-        /// <returns>Navigation ViewModel of Track ViewModel</returns>
-        Task<NavigationViewModel<TrackViewModel>>
-            ListTracksAsync(
+        /// <returns>Navigation ViewModel of Track View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        Task<NavigationViewModel<TrackViewModel>> ListTracksAsync(
             TrackType type,
             string id = null);
 
         /// <summary>
         /// List Tracks
         /// </summary>
-        /// <param name="navigation">Navigation ViewModel of Track ViewModel</param>
-        /// <returns>Navigation ViewModel of Track ViewModel</returns>
+        /// <param name="navigation">Navigation View Model of Track View Model</param>
+        /// <returns>Navigation ViewModel of Track View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<NavigationViewModel<TrackViewModel>> ListTracksAsync(
             NavigationViewModel<TrackViewModel> navigation);
 
@@ -215,7 +300,8 @@ namespace Spotify.Uwp
         /// List Audio Features
         /// </summary>
         /// <param name="id">Track Spotify Id</param>
-        /// <returns>List of AudioFeatureViewModel</returns>
+        /// <returns>List of Audio Feature View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<List<AudioFeatureViewModel>> ListAudioFeatureAsync(
             string id);
 
@@ -223,9 +309,96 @@ namespace Spotify.Uwp
         /// List Audio Features
         /// </summary>
         /// <param name="ids">List of Track Spotify Id</param>
-        /// <returns>List of List of AudioFeature ViewModel</returns>
+        /// <returns>List of List of Audio Feature View Model</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
         Task<List<List<AudioFeatureViewModel>>> ListAudioFeaturesAsync(
             List<string> ids);
         #endregion List Methods   
+
+        #region Follow Methods
+        /// <summary>
+        /// Is Following Artists or Users and Check if Users Follow a Playlist
+        /// <para>Scopes: FollowRead, PlaylistReadPrivate</para>
+        /// </summary>
+        /// <param name="ids">(Required for FollowType.Artist or FollowType.User) List of the Artist or the User Spotify IDs to check</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
+        /// <returns>List of True or False values</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        Task<List<bool>> IsFollowing(
+            List<string> ids,
+            FollowType type,
+            string playlistId = null);
+
+        /// <summary>
+        /// Is Following
+        /// <para>Scopes: FollowRead, PlaylistReadPrivate</para>
+        /// </summary>
+        /// <param name="id">(Required) Artist, User or Playlist Spotify ID to check</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <returns>True if Is, False if Not</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        Task<bool> IsFollowing(
+            string id,
+            FollowType type);
+
+        /// <summary>
+        /// Follow
+        /// <para>Scopes: FollowModify</para>
+        /// </summary>
+        /// <param name="ids">(Required for FollowType.Artist or FollowType.User) Artist or the User Spotify IDs to Follow</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
+        /// <returns>True if Successful, False if Not Successful</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        Task<bool> Follow(
+            List<string> ids,
+            FollowType type,
+            string playlistId = null);
+
+        /// <summary>
+        /// Follow
+        /// <para>Scopes: FollowModify</para>
+        /// </summary>
+        /// <param name="id">(Required) Artist, User or Playlist Spotify ID to Follow</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <returns>True if Is, False if Not</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        Task<bool> Follow(
+            string id,
+            FollowType type);
+
+        /// <summary>
+        /// Unfollow
+        /// <para>Scopes: FollowModify, PlaylistModifyPublic, PlaylistModifyPrivate</para>
+        /// </summary>
+        /// <param name="ids">(Required for FollowType.Artist or FollowType.User) Artist or the User Spotify IDs to Follow</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <param name="playlistId">(Required for FollowType.Playlist) The Spotify ID of the playlist</param>
+        /// <returns>True if Successful, False if Not Successful</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        Task<bool> Unfollow(
+            List<string> ids,
+            FollowType type,
+            string playlistId = null);
+
+        /// <summary>
+        /// Unfollow
+        /// <para>Scopes: FollowModify, PlaylistModifyPublic, PlaylistModifyPrivate</para>
+        /// </summary>
+        /// <param name="id">(Required) Artist or the User Spotify ID to Unfollow</param>
+        /// <param name="type">(Required) Either Artist, User or Playlist</param>
+        /// <returns>True if Is, False if Not</returns>
+        /// <exception cref="TokenRequiredException">Token Required and TokenRequiredEvent not Subscribed to</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        Task<bool> Unfollow(
+            string id,
+            FollowType type);
+        #endregion Follow Methods
     }
 }
