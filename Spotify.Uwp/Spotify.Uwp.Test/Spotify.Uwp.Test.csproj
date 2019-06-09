@@ -139,6 +139,7 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="appsettings.example.json" />
     <None Include="Spotify.Uwp.Test_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
