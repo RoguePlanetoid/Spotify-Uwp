@@ -2,17 +2,17 @@
 <package>
   <metadata>
     <id>Spotify.Uwp</id>
-    <version>0.7.6</version>
+    <version>1.0.0</version>
     <authors>RoguePlanetoid</authors>
-    <owners>RoguePlanetoid</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
-    <description>Spotify SDK UWP Library</description>
-    <releaseNotes>Beta Version</releaseNotes>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <description>Spotify API .NET Standard SDK Library for Universal Windows Platform Extensions</description>
+    <releaseNotes>1.0.0 Initial Release</releaseNotes>
     <repository url="https://github.com/RoguePlanetoid/Spotify-Uwp" />
 	<dependencies>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="Spotify.NetStandard" version="1.1.2" exclude="Build,Analyzers" />
+        <dependency id="Spotify.NetStandard.Sdk" version="1.0.0" exclude="Build,Analyzers" />
       </group>
     </dependencies>
   </metadata>

@@ -1,6 +1,6 @@
-# Spotify.NetStandard
+# Spotify.Uwp
 
-Spotify API .NET Standard Library Extensions for Universal Windows Platform 
+Spotify API .NET Standard SDK Library for Universal Windows Platform Extensions
 
 ## Documentation and Source Code
 
@@ -17,18 +17,22 @@ Install-Package Spotify.Uwp
 
 ```c#
 using Spotify.Uwp;
+using Spotify.NetStandard.Sdk;
 
 var client = SpotifySdkClientFactory
     .CreateSpotifySdkClient(
-    "client-id","client-secret");
-var browse = await client.ListAlbumsAsync(
-                AlbumType.NewReleases)
-foreach (var album in browse.Items)
-{
-    ...
-}
+        "client-id",
+        "client-secret");
+
+var model = new ListAlbumViewModel(client, AlbumType.NewReleases);
 ```
 
 ## Client Id and Client Secret
 
 You can get a "client-id" and "client-secret" from [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard/) by signing in with your Spotify Id then creating an Application.
+
+## Change Log
+
+### Version 1.0.0
+
+- Initial Release
