@@ -5,11 +5,11 @@
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   IgnorableNamespaces="uap mp">
 
-  <Identity Name="469044b2-7726-4432-90ce-994400e6dd7c"
+  <Identity Name="35a740ce-29bc-4db3-ab49-b7c60e69f73a"
             Publisher="CN=rogue"
             Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="469044b2-7726-4432-90ce-994400e6dd7c" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="35a740ce-29bc-4db3-ab49-b7c60e69f73a" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Spotify.Uwp.Test</DisplayName>
